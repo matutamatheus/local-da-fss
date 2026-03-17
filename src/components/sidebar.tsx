@@ -9,10 +9,10 @@ import {
   Home,
   LogOut,
   MapPin,
-  Settings,
   Users,
   Link2,
   Image,
+  X,
 } from 'lucide-react'
 import { UserRole } from '@/lib/types'
 import { createClient } from '@/lib/supabase/client'
@@ -21,6 +21,8 @@ import { useRouter } from 'next/navigation'
 interface SidebarProps {
   role: UserRole
   userName: string
+  open: boolean
+  onClose: () => void
 }
 
 const solicitanteLinks = [
@@ -41,7 +43,7 @@ const adminLinks = [
   { href: '/especificacoes', label: 'Especificações', icon: Image },
 ]
 
-export function Sidebar({ role, userName }: SidebarProps) {
+export function Sidebar({ role, userName, open, onClose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const links = role === 'admin' ? adminLinks : solicitanteLinks
@@ -52,11 +54,27 @@ export function Sidebar({ role, userName }: SidebarProps) {
     router.push('/login')
   }
 
+  function handleNavClick() {
+    onClose()
+  }
+
   return (
-    <aside className="fixed left-0 top-0 h-full w-[var(--sidebar-width)] bg-white border-r border-[var(--gray-200)] flex flex-col z-40">
-      <div className="px-6 py-5 border-b border-[var(--gray-200)]">
-        <h1 className="text-xl font-bold text-[var(--primary)]">Local da FSS</h1>
-        <p className="text-xs text-[var(--gray-500)] mt-0.5">Gerenciamento de Eventos</p>
+    <aside
+      className={`fixed left-0 top-0 h-full w-[var(--sidebar-width)] bg-white border-r border-[var(--gray-200)] flex flex-col z-50 transition-transform duration-200 ${
+        open ? 'translate-x-0' : '-translate-x-full'
+      } lg:translate-x-0`}
+    >
+      <div className="px-6 py-5 border-b border-[var(--gray-200)] flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-[var(--primary)]">Local da FSS</h1>
+          <p className="text-xs text-[var(--gray-500)] mt-0.5">Gerenciamento de Eventos</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="lg:hidden p-1.5 rounded-lg text-[var(--gray-400)] hover:text-[var(--gray-600)] hover:bg-[var(--gray-100)]"
+        >
+          <X size={20} />
+        </button>
       </div>
 
       <nav className="flex-1 px-3 py-4 overflow-y-auto">
@@ -67,6 +85,7 @@ export function Sidebar({ role, userName }: SidebarProps) {
               <li key={link.href}>
                 <Link
                   href={link.href}
+                  onClick={handleNavClick}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-[var(--primary-light)] text-[var(--primary)]'

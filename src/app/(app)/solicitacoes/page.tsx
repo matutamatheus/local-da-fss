@@ -20,14 +20,14 @@ export default async function SolicitacoesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 lg:mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--gray-900)]">Minhas Solicitações</h1>
-          <p className="text-[var(--gray-500)] mt-1">Acompanhe o status dos seus pedidos</p>
+          <h1 className="text-xl lg:text-2xl font-bold text-[var(--gray-900)]">Minhas Solicitações</h1>
+          <p className="text-[var(--gray-500)] mt-1 text-sm">Acompanhe o status dos seus pedidos</p>
         </div>
         <Link
           href="/solicitacoes/nova"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--primary)] text-white rounded-lg text-sm font-medium hover:bg-[var(--primary-hover)] transition-colors"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--primary)] text-white rounded-lg text-sm font-medium hover:bg-[var(--primary-hover)] transition-colors"
         >
           Nova Solicitação
         </Link>
@@ -47,7 +47,7 @@ export default async function SolicitacoesPage() {
           {solicitacoes.map((sol) => (
             <Link key={sol.id} href={`/solicitacoes/${sol.id}`}>
               <Card className="hover:border-[var(--primary)] transition-colors cursor-pointer">
-                <CardContent className="flex items-center justify-between">
+                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-semibold text-[var(--gray-900)] truncate">{sol.titulo}</h3>
                     <p className="text-xs text-[var(--gray-500)] mt-1">

@@ -146,12 +146,12 @@ export default function AdminSolicitacoesPage() {
       </div>
 
       {/* Filtros */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-6">
         {['todos', 'pendente', 'aprovado', 'recusado', 'cancelado'].map((status) => (
           <button
             key={status}
             onClick={() => setFiltroStatus(status)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
               filtroStatus === status
                 ? 'bg-[var(--primary)] text-white'
                 : 'bg-white text-[var(--gray-600)] border border-[var(--gray-300)] hover:bg-[var(--gray-50)]'
@@ -159,7 +159,7 @@ export default function AdminSolicitacoesPage() {
           >
             {status === 'todos' ? 'Todos' : status.charAt(0).toUpperCase() + status.slice(1)}
             {status !== 'todos' && (
-              <span className="ml-1.5 text-xs">
+              <span className="ml-1 text-xs">
                 ({solicitacoes.filter(s => status === 'todos' || s.status === status).length})
               </span>
             )}
@@ -179,9 +179,9 @@ export default function AdminSolicitacoesPage() {
         <div className="space-y-3">
           {filtered.map((sol) => (
             <Card key={sol.id} className="hover:border-[var(--primary)] transition-colors">
-              <CardContent className="flex items-center justify-between">
+              <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-sm font-semibold text-[var(--gray-900)] truncate">{sol.titulo}</h3>
                     <StatusBadge status={sol.status as EventStatus} />
                   </div>
@@ -192,7 +192,7 @@ export default function AdminSolicitacoesPage() {
                     {(sol.espaco as any)?.nome || '—'}
                   </p>
                 </div>
-                <div className="flex items-center gap-2 ml-4">
+                <div className="flex items-center gap-2 shrink-0">
                   <Button variant="ghost" size="sm" onClick={() => openDetail(sol)}>
                     <Eye size={16} />
                   </Button>

@@ -71,3 +71,26 @@ body {
   font-size: 1.25rem;
   font-weight: 600;
 }
+
+/* FullCalendar responsivo */
+@media (max-width: 640px) {
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1rem;
+  }
+  .fc .fc-button {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* Modal responsivo */
+@media (max-width: 640px) {
+  .fixed.inset-0.z-50 > div {
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+  }
+}

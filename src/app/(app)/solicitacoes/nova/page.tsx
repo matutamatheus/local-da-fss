@@ -193,15 +193,15 @@ export default function NovaSolicitacaoPage() {
   }
 
   return (
-    <div className="max-w-5xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[var(--gray-900)]">Nova Solicitação</h1>
-        <p className="text-[var(--gray-500)] mt-1">Preencha os dados do evento desejado</p>
+    <div className="max-w-5xl mx-auto">
+      <div className="mb-6 lg:mb-8">
+        <h1 className="text-xl lg:text-2xl font-bold text-[var(--gray-900)]">Nova Solicitação</h1>
+        <p className="text-[var(--gray-500)] mt-1 text-sm">Preencha os dados do evento desejado</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
         {/* Calendário de disponibilidade */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 order-2 lg:order-1">
           <Card>
             <CardHeader>
               <h2 className="text-sm font-semibold text-[var(--gray-900)] flex items-center gap-2">
@@ -243,7 +243,7 @@ export default function NovaSolicitacaoPage() {
         </div>
 
         {/* Formulário */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 order-1 lg:order-2">
           <Card>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-5 py-2">
