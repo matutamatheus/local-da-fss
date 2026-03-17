@@ -13,6 +13,10 @@ const statusConfig: Record<EventStatus, { label: string; className: string }> = 
     label: 'Recusado',
     className: 'bg-[var(--danger-light)] text-red-800',
   },
+  cancelado: {
+    label: 'Cancelado',
+    className: 'bg-[var(--gray-100)] text-[var(--gray-600)]',
+  },
 }
 
 export function StatusBadge({ status }: { status: EventStatus }) {

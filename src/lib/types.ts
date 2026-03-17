@@ -1,6 +1,6 @@
 export type UserRole = 'admin' | 'solicitante'
 
-export type EventStatus = 'pendente' | 'aprovado' | 'recusado'
+export type EventStatus = 'pendente' | 'aprovado' | 'recusado' | 'cancelado'
 
 export interface UserProfile {
   id: string

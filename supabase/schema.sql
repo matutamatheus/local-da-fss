@@ -32,7 +32,7 @@ CREATE TABLE public.solicitacoes (
   espaco_id UUID REFERENCES public.espacos(id) ON DELETE SET NULL,
   solicitante_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   num_participantes INTEGER NOT NULL DEFAULT 1,
-  status TEXT NOT NULL DEFAULT 'pendente' CHECK (status IN ('pendente', 'aprovado', 'recusado')),
+  status TEXT NOT NULL DEFAULT 'pendente' CHECK (status IN ('pendente', 'aprovado', 'recusado', 'cancelado')),
   recursos_adicionais TEXT,
   observacoes TEXT,
   motivo_recusa TEXT,

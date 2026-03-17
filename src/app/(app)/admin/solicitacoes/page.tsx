@@ -9,7 +9,7 @@ import { Modal } from '@/components/ui/modal'
 import { Textarea } from '@/components/ui/textarea'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Check, X, Eye, Download, FileText, Film, ImageIcon } from 'lucide-react'
+import { Check, X, Eye, Download, FileText, Film, ImageIcon, Undo2 } from 'lucide-react'
 import type { Solicitacao, EventStatus, Anexo } from '@/lib/types'
 
 export default function AdminSolicitacoesPage() {
@@ -20,7 +20,9 @@ export default function AdminSolicitacoesPage() {
   const [anexos, setAnexos] = useState<(Anexo & { url?: string })[]>([])
   const [showModal, setShowModal] = useState(false)
   const [showRecusaModal, setShowRecusaModal] = useState(false)
+  const [showCancelModal, setShowCancelModal] = useState(false)
   const [motivoRecusa, setMotivoRecusa] = useState('')
+  const [motivoCancelamento, setMotivoCancelamento] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
@@ -89,6 +91,35 @@ export default function AdminSolicitacoesPage() {
     setActionLoading(false)
   }
 
+  async function handleCancelar() {
+    if (!selectedSol) return
+    setActionLoading(true)
+    const supabase = createClient()
+    await supabase
+      .from('solicitacoes')
+      .update({ status: 'cancelado', motivo_recusa: motivoCancelamento ? `Cancelado: ${motivoCancelamento}` : 'Cancelado pelo administrador' })
+      .eq('id', selectedSol.id)
+
+    setShowCancelModal(false)
+    setShowModal(false)
+    setMotivoCancelamento('')
+    await loadSolicitacoes()
+    setActionLoading(false)
+  }
+
+  async function handleVoltarPendente(sol: Solicitacao) {
+    setActionLoading(true)
+    const supabase = createClient()
+    await supabase
+      .from('solicitacoes')
+      .update({ status: 'pendente', motivo_recusa: null })
+      .eq('id', sol.id)
+
+    setShowModal(false)
+    await loadSolicitacoes()
+    setActionLoading(false)
+  }
+
   const filtered = filtroStatus === 'todos'
     ? solicitacoes
     : solicitacoes.filter(s => s.status === filtroStatus)
@@ -116,7 +147,7 @@ export default function AdminSolicitacoesPage() {
 
       {/* Filtros */}
       <div className="flex gap-2 mb-6">
-        {['todos', 'pendente', 'aprovado', 'recusado'].map((status) => (
+        {['todos', 'pendente', 'aprovado', 'recusado', 'cancelado'].map((status) => (
           <button
             key={status}
             onClick={() => setFiltroStatus(status)}
@@ -174,6 +205,11 @@ export default function AdminSolicitacoesPage() {
                         <X size={16} />
                       </Button>
                     </>
+                  )}
+                  {sol.status === 'aprovado' && (
+                    <Button variant="danger" size="sm" onClick={() => { setSelectedSol(sol); setShowCancelModal(true) }} title="Cancelar aprovação">
+                      <Undo2 size={16} />
+                    </Button>
                   )}
                 </div>
               </CardContent>
@@ -287,6 +323,25 @@ export default function AdminSolicitacoesPage() {
                 </Button>
               </div>
             )}
+
+            {selectedSol.status === 'aprovado' && (
+              <div className="flex gap-3 pt-2 border-t border-[var(--gray-200)]">
+                <Button variant="danger" onClick={() => setShowCancelModal(true)} loading={actionLoading}>
+                  <Undo2 size={16} /> Cancelar Aprovação
+                </Button>
+                <Button variant="ghost" onClick={() => handleVoltarPendente(selectedSol)} loading={actionLoading}>
+                  Voltar para Pendente
+                </Button>
+              </div>
+            )}
+
+            {(selectedSol.status === 'recusado' || selectedSol.status === 'cancelado') && (
+              <div className="flex gap-3 pt-2 border-t border-[var(--gray-200)]">
+                <Button variant="ghost" onClick={() => handleVoltarPendente(selectedSol)} loading={actionLoading}>
+                  <Undo2 size={16} /> Reabrir como Pendente
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </Modal>
@@ -308,7 +363,35 @@ export default function AdminSolicitacoesPage() {
               Confirmar Recusa
             </Button>
             <Button variant="secondary" onClick={() => setShowRecusaModal(false)}>
-              Cancelar
+              Voltar
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal de cancelamento */}
+      <Modal open={showCancelModal} onClose={() => setShowCancelModal(false)} title="Cancelar Solicitação Aprovada">
+        <div className="space-y-4">
+          <div className="bg-[var(--warning-light)] border border-amber-300 rounded-lg p-3">
+            <p className="text-sm text-amber-800">
+              Você está cancelando uma solicitação que já foi <strong>aprovada</strong>. O evento será removido do calendário.
+            </p>
+          </div>
+          <p className="text-sm text-[var(--gray-600)]">
+            Solicitação: <strong>&ldquo;{selectedSol?.titulo}&rdquo;</strong>
+          </p>
+          <Textarea
+            label="Motivo do cancelamento (opcional)"
+            value={motivoCancelamento}
+            onChange={(e) => setMotivoCancelamento(e.target.value)}
+            placeholder="Informe o motivo do cancelamento..."
+          />
+          <div className="flex gap-3">
+            <Button variant="danger" onClick={handleCancelar} loading={actionLoading}>
+              Confirmar Cancelamento
+            </Button>
+            <Button variant="secondary" onClick={() => setShowCancelModal(false)}>
+              Voltar
             </Button>
           </div>
         </div>
