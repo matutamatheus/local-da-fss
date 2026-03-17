@@ -36,6 +36,7 @@ CREATE TABLE public.solicitacoes (
   recursos_adicionais TEXT,
   observacoes TEXT,
   motivo_recusa TEXT,
+  google_event_id TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

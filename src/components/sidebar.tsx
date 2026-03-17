@@ -12,6 +12,7 @@ import {
   Users,
   Link2,
   Image,
+  Settings,
   X,
 } from 'lucide-react'
 import { UserRole } from '@/lib/types'
@@ -31,6 +32,7 @@ const solicitanteLinks = [
   { href: '/solicitacoes', label: 'Minhas Solicitações', icon: ClipboardList },
   { href: '/calendario', label: 'Calendário', icon: Calendar },
   { href: '/especificacoes', label: 'Especificações', icon: Image },
+  { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
 const adminLinks = [
@@ -41,6 +43,7 @@ const adminLinks = [
   { href: '/admin/convites', label: 'Convites', icon: Link2 },
   { href: '/admin/usuarios', label: 'Usuários', icon: Users },
   { href: '/especificacoes', label: 'Especificações', icon: Image },
+  { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
 export function Sidebar({ role, userName, open, onClose }: SidebarProps) {
