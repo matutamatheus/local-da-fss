@@ -96,12 +96,18 @@ ALTER TABLE public.solicitacoes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.anexos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.convites ENABLE ROW LEVEL SECURITY;
 
+-- Função helper para verificar admin (SECURITY DEFINER evita recursão no RLS)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
 -- Profiles: usuários veem seu próprio perfil, admin vê todos
 CREATE POLICY "Usuarios veem proprio perfil" ON public.profiles
-  FOR SELECT USING (
-    auth.uid() = id
-    OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
-  );
+  FOR SELECT USING (auth.uid() = id OR public.is_admin());
 
 CREATE POLICY "Usuarios atualizam proprio perfil" ON public.profiles
   FOR UPDATE USING (auth.uid() = id);
@@ -114,30 +120,22 @@ CREATE POLICY "Todos veem espacos" ON public.espacos
   FOR SELECT USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Admin gerencia espacos" ON public.espacos
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
-  );
+  FOR ALL USING (public.is_admin());
 
 -- Solicitações: solicitante vê as suas, admin vê todas
 CREATE POLICY "Solicitante ve suas solicitacoes" ON public.solicitacoes
-  FOR SELECT USING (
-    solicitante_id = auth.uid()
-    OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
-  );
+  FOR SELECT USING (solicitante_id = auth.uid() OR public.is_admin());
 
 CREATE POLICY "Solicitante cria solicitacao" ON public.solicitacoes
   FOR INSERT WITH CHECK (solicitante_id = auth.uid());
 
 CREATE POLICY "Solicitante edita pendente" ON public.solicitacoes
   FOR UPDATE USING (
-    (solicitante_id = auth.uid() AND status = 'pendente')
-    OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+    (solicitante_id = auth.uid() AND status = 'pendente') OR public.is_admin()
   );
 
 CREATE POLICY "Admin deleta solicitacao" ON public.solicitacoes
-  FOR DELETE USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
-  );
+  FOR DELETE USING (public.is_admin());
 
 -- Anexos: mesmas regras da solicitação pai
 CREATE POLICY "Ver anexos da solicitacao" ON public.anexos
@@ -145,8 +143,7 @@ CREATE POLICY "Ver anexos da solicitacao" ON public.anexos
     EXISTS (
       SELECT 1 FROM public.solicitacoes s
       WHERE s.id = solicitacao_id
-      AND (s.solicitante_id = auth.uid()
-        OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'))
+      AND (s.solicitante_id = auth.uid() OR public.is_admin())
     )
   );
 
@@ -163,16 +160,13 @@ CREATE POLICY "Deletar anexo" ON public.anexos
     EXISTS (
       SELECT 1 FROM public.solicitacoes s
       WHERE s.id = solicitacao_id
-      AND (s.solicitante_id = auth.uid()
-        OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'))
+      AND (s.solicitante_id = auth.uid() OR public.is_admin())
     )
   );
 
 -- Convites: só admin
 CREATE POLICY "Admin gerencia convites" ON public.convites
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
-  );
+  FOR ALL USING (public.is_admin());
 
 CREATE POLICY "Verificar convite no registro" ON public.convites
   FOR SELECT USING (true);
@@ -189,10 +183,7 @@ CREATE POLICY "Ver arquivos de anexos" ON storage.objects
   FOR SELECT USING (bucket_id = 'anexos' AND auth.uid() IS NOT NULL);
 
 CREATE POLICY "Admin deleta arquivos" ON storage.objects
-  FOR DELETE USING (
-    bucket_id = 'anexos'
-    AND EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
-  );
+  FOR DELETE USING (bucket_id = 'anexos' AND public.is_admin());
 
 -- =============================================
 -- Trigger: criar perfil ao registrar
