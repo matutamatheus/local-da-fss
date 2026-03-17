@@ -32,8 +32,12 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Rotas públicas
-  const publicRoutes = ['/login', '/registro']
+  const publicRoutes = ['/login', '/registro', '/esqueci-senha']
   const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname.startsWith(route))
+
+  // Rotas de API não devem ser redirecionadas pelo middleware
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api/')
+  if (isApiRoute) return supabaseResponse
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()

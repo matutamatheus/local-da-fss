@@ -55,14 +55,21 @@ export default function LoginPage() {
               placeholder="seu@email.com"
               required
             />
-            <Input
-              label="Senha"
-              type="password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              placeholder="Sua senha"
-              required
-            />
+            <div>
+              <Input
+                label="Senha"
+                type="password"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                placeholder="Sua senha"
+                required
+              />
+              <div className="mt-1 text-right">
+                <Link href="/esqueci-senha" className="text-xs text-[var(--gray-500)] hover:text-[var(--primary)]">
+                  Esqueci minha senha
+                </Link>
+              </div>
+            </div>
 
             {error && (
               <p className="text-sm text-[var(--danger)] bg-[var(--danger-light)] rounded-lg px-3 py-2">
