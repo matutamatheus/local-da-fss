@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Local da FSS
 
-## Getting Started
+Sistema de Gerenciamento de Espaços para Eventos.
 
-First, run the development server:
+## Stack
+
+- **Frontend:** Next.js 16 (App Router) + TypeScript + Tailwind CSS
+- **Backend:** Supabase (Auth + Postgres + Storage)
+- **Calendário:** FullCalendar
+- **Exportação:** iCal (.ics)
+
+## Funcionalidades
+
+- **Autenticação:** Login/registro via convite (link compartilhado por WhatsApp)
+- **Solicitante:** Criar solicitações de evento com upload de arquivos (imagens, PDFs, vídeos)
+- **Admin:** Aprovar/recusar solicitações, gerenciar espaços, convites e usuários
+- **Calendário:** Visualização dia/semana/mês dos eventos aprovados
+- **Exportação .ics:** Download individual ou de todos os eventos para Google Calendar
+- **Especificações:** Página para informações do local e tamanhos de mídia (em construção)
+
+## Setup
+
+### 1. Clonar e instalar
+
+```bash
+git clone <repo-url>
+cd local-da-fss
+npm install
+```
+
+### 2. Configurar Supabase
+
+1. Criar um projeto no [Supabase](https://supabase.com)
+2. Executar o schema SQL em `supabase/schema.sql` no SQL Editor do Supabase
+3. Copiar `.env.local.example` para `.env.local` e preencher:
+
+```bash
+cp .env.local.example .env.local
+```
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+```
+
+### 3. Criar primeiro admin
+
+No SQL Editor do Supabase, após registrar o primeiro usuário:
+
+```sql
+UPDATE public.profiles SET role = 'admin' WHERE email = 'seu@email.com';
+```
+
+### 4. Rodar
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy (Vercel)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install -g vercel
+vercel
+```
 
-## Learn More
+Configure as variáveis de ambiente no painel da Vercel.
 
-To learn more about Next.js, take a look at the following resources:
+## Estrutura
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/
+│   ├── (auth)/          # Login e registro
+│   ├── (app)/           # Área autenticada
+│   │   ├── dashboard/   # Dashboard do solicitante
+│   │   ├── solicitacoes/# CRUD de solicitações
+│   │   ├── calendario/  # Calendário público
+│   │   ├── especificacoes/ # Specs do local
+│   │   └── admin/       # Área administrativa
+│   └── api/ics/         # API de exportação .ics
+├── components/          # Componentes reutilizáveis
+├── lib/                 # Supabase clients, tipos
+└── middleware.ts        # Auth middleware
+supabase/
+└── schema.sql           # Schema completo do banco
+```
