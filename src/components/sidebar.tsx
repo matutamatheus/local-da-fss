@@ -4,15 +4,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Calendar,
+  CalendarPlus,
   ClipboardList,
   FilePlus,
   Home,
+  KanbanSquare,
   LogOut,
   MapPin,
   Users,
   Link2,
   Image,
   Settings,
+  DollarSign,
+  UserCog,
   X,
 } from 'lucide-react'
 import { UserRole } from '@/lib/types'
@@ -35,13 +39,33 @@ const solicitanteLinks = [
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
+const comercialLinks = [
+  { href: '/clientes', label: 'Clientes', icon: Users },
+  { href: '/reservas/nova', label: 'Bookar Data', icon: CalendarPlus },
+  { href: '/crm', label: 'CRM', icon: KanbanSquare },
+  { href: '/calendario', label: 'Calendário', icon: Calendar },
+  { href: '/especificacoes', label: 'Especificações', icon: Image },
+  { href: '/configuracoes', label: 'Configurações', icon: Settings },
+]
+
+const parceiroLinks = [
+  { href: '/clientes', label: 'Clientes', icon: Users },
+  { href: '/reservas/nova', label: 'Nova Pré-reserva', icon: CalendarPlus },
+  { href: '/calendario', label: 'Calendário', icon: Calendar },
+  { href: '/configuracoes', label: 'Configurações', icon: Settings },
+]
+
 const adminLinks = [
   { href: '/admin', label: 'Painel Admin', icon: Home },
   { href: '/admin/solicitacoes', label: 'Solicitações', icon: ClipboardList },
+  { href: '/reservas/nova', label: 'Bookar Data', icon: CalendarPlus },
   { href: '/admin/calendario', label: 'Calendário', icon: Calendar },
+  { href: '/clientes', label: 'Clientes', icon: Users },
+  { href: '/crm', label: 'CRM', icon: KanbanSquare },
   { href: '/admin/espacos', label: 'Espaços', icon: MapPin },
   { href: '/admin/convites', label: 'Convites', icon: Link2 },
-  { href: '/admin/usuarios', label: 'Usuários', icon: Users },
+  { href: '/admin/usuarios', label: 'Usuários', icon: UserCog },
+  { href: '/admin/regras', label: 'Regras de Preço', icon: DollarSign },
   { href: '/especificacoes', label: 'Especificações', icon: Image },
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
@@ -49,7 +73,12 @@ const adminLinks = [
 export function Sidebar({ role, userName, open, onClose }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const links = role === 'admin' ? adminLinks : solicitanteLinks
+
+  const links =
+    role === 'admin' ? adminLinks :
+    role === 'comercial' ? comercialLinks :
+    role === 'parceiro' ? parceiroLinks :
+    solicitanteLinks
 
   async function handleLogout() {
     const supabase = createClient()
@@ -59,6 +88,13 @@ export function Sidebar({ role, userName, open, onClose }: SidebarProps) {
 
   function handleNavClick() {
     onClose()
+  }
+
+  const roleLabel: Record<UserRole, string> = {
+    admin: 'Administrador',
+    comercial: 'Comercial',
+    parceiro: 'Parceiro',
+    solicitante: 'Solicitante',
   }
 
   return (
@@ -83,7 +119,12 @@ export function Sidebar({ role, userName, open, onClose }: SidebarProps) {
       <nav className="flex-1 px-3 py-4 overflow-y-auto">
         <ul className="space-y-1">
           {links.map((link) => {
-            const isActive = pathname === link.href || (link.href !== '/dashboard' && link.href !== '/admin' && pathname.startsWith(link.href))
+            const isActive = pathname === link.href || (
+              link.href !== '/dashboard' &&
+              link.href !== '/admin' &&
+              link.href !== '/clientes' &&
+              pathname.startsWith(link.href)
+            ) || (link.href === '/clientes' && pathname.startsWith('/clientes'))
             return (
               <li key={link.href}>
                 <Link
@@ -107,7 +148,7 @@ export function Sidebar({ role, userName, open, onClose }: SidebarProps) {
       <div className="px-3 py-4 border-t border-[var(--gray-200)]">
         <div className="px-3 py-2 mb-2">
           <p className="text-sm font-medium text-[var(--gray-900)] truncate">{userName}</p>
-          <p className="text-xs text-[var(--gray-500)] capitalize">{role}</p>
+          <p className="text-xs text-[var(--gray-500)] capitalize">{roleLabel[role] ?? role}</p>
         </div>
         <button
           onClick={handleLogout}

@@ -46,8 +46,20 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && isPublicRoute) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    if (profile?.role === 'admin') {
+      url.pathname = '/admin'
+    } else if (profile?.role === 'comercial' || profile?.role === 'parceiro') {
+      url.pathname = '/clientes'
+    } else {
+      url.pathname = '/dashboard'
+    }
     return NextResponse.redirect(url)
   }
 
