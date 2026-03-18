@@ -16,6 +16,7 @@ export default function RegistroForm() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [tokenValido, setTokenValido] = useState<boolean | null>(null)
+  const [inviteRole, setInviteRole] = useState<string>('solicitante')
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
@@ -38,6 +39,7 @@ export default function RegistroForm() {
       if (data) {
         setTokenValido(true)
         if (data.email) setEmail(data.email)
+        if (data.role) setInviteRole(data.role)
       } else {
         setTokenValido(false)
       }
@@ -67,7 +69,7 @@ export default function RegistroForm() {
       options: {
         data: {
           nome,
-          role: 'solicitante',
+          role: inviteRole,
           telefone,
         },
       },

@@ -2,10 +2,12 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Users, Mic, BookOpen, Edit2 } from 'lucide-react'
+import { ArrowLeft, Calendar, Users, Mic, BookOpen } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import ReservaStatusEdit from './status-edit'
+import GerarProposta from './gerar-proposta'
 
 const statusLabel: Record<string, string> = {
   aberta: 'Aberta',
@@ -16,7 +18,7 @@ const statusLabel: Record<string, string> = {
 
 const statusColor: Record<string, string> = {
   aberta: 'bg-blue-100 text-blue-700',
-  pre_reservada: 'bg-purple-100 text-purple-700',
+  pre_reservada: 'bg-yellow-100 text-yellow-700',
   agendada: 'bg-green-100 text-green-700',
   cancelada: 'bg-gray-100 text-gray-500',
 }
@@ -55,10 +57,12 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
 
   if (!reserva) notFound()
 
+  const cliente = reserva.cliente as { id: string; nome: string; empresa?: string; email?: string; telefone?: string } | null
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <Link href={reserva.cliente_id ? `/clientes/${reserva.cliente_id}` : '/clientes'}
+        <Link href={cliente?.id ? `/clientes/${cliente.id}` : '/clientes'}
           className="flex items-center gap-2 text-sm text-[var(--gray-500)] hover:text-[var(--gray-700)] mb-4">
           <ArrowLeft size={16} /> Voltar
         </Link>
@@ -66,8 +70,8 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
           <div>
             <h1 className="text-xl lg:text-2xl font-bold text-[var(--gray-900)]">Reserva</h1>
             <p className="text-[var(--gray-500)] mt-0.5 text-sm">
-              {reserva.cliente?.nome ?? 'Cliente não encontrado'}
-              {reserva.cliente?.empresa ? ` — ${reserva.cliente.empresa}` : ''}
+              {cliente?.nome ?? 'Cliente não encontrado'}
+              {cliente?.empresa ? ` — ${cliente.empresa}` : ''}
             </p>
           </div>
           <span className={`text-sm px-3 py-1 rounded-full font-medium shrink-0 ${statusColor[reserva.status]}`}>
@@ -104,10 +108,10 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
                   <dd className="text-sm mt-0.5">{reserva.audiovisual ? 'Incluso' : 'Não incluso'}</dd>
                 </div>
               </div>
-              {reserva.espaco && (
+              {(reserva.espaco as any)?.nome && (
                 <div>
                   <dt className="text-xs text-[var(--gray-500)]">Espaço</dt>
-                  <dd className="text-sm mt-0.5">{reserva.espaco.nome}</dd>
+                  <dd className="text-sm mt-0.5">{(reserva.espaco as any).nome}</dd>
                 </div>
               )}
               {reserva.observacoes && (
@@ -120,7 +124,6 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
           </CardContent>
         </Card>
 
-        {/* Financeiro */}
         {(reserva.valor_total != null) && (
           <Card>
             <CardHeader><h2 className="font-semibold text-[var(--gray-900)]">Valores</h2></CardHeader>
@@ -147,20 +150,15 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
           </Card>
         )}
 
-        {/* Propostas */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-[var(--gray-900)]">Propostas ({propostas?.length ?? 0})</h2>
-            </div>
+            <h2 className="font-semibold text-[var(--gray-900)]">Propostas ({propostas?.length ?? 0})</h2>
           </CardHeader>
-          <CardContent>
-            {!propostas?.length ? (
-              <p className="text-sm text-[var(--gray-400)]">Nenhuma proposta gerada.</p>
-            ) : (
+          <CardContent className="space-y-4">
+            {propostas && propostas.length > 0 && (
               <div className="space-y-2">
                 {propostas.map(p => (
-                  <Link key={p.id} href={`/propostas/${p.id}/imprimir`} target="_blank"
+                  <a key={p.id} href={`/propostas/${p.id}/imprimir`} target="_blank"
                     className="flex items-center justify-between bg-[var(--gray-50)] rounded-lg p-3 hover:bg-[var(--gray-100)] transition-colors group"
                   >
                     <div className="flex items-center gap-2">
@@ -175,17 +173,23 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
                         Abrir PDF →
                       </span>
                     </div>
-                  </Link>
+                  </a>
                 ))}
               </div>
             )}
+
+            <GerarProposta
+              reservaId={id}
+              clienteId={reserva.cliente_id}
+              valorTotal={reserva.valor_total}
+              clienteEmail={cliente?.email}
+            />
           </CardContent>
         </Card>
 
-        {/* Actions */}
         <div className="flex gap-3 flex-wrap">
-          {reserva.cliente_id && (
-            <Link href={`/clientes/${reserva.cliente_id}`}>
+          {cliente?.id && (
+            <Link href={`/clientes/${cliente.id}`}>
               <button className="flex items-center gap-2 px-4 py-2 border border-[var(--gray-200)] rounded-lg text-sm hover:bg-[var(--gray-50)] transition-colors">
                 <Users size={15} /> Ver Cliente
               </button>
@@ -197,6 +201,3 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
     </div>
   )
 }
-
-// Inline client component for status change
-import ReservaStatusEdit from './status-edit'

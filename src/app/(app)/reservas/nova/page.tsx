@@ -26,6 +26,7 @@ function NovaReservaForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [conflito, setConflito] = useState(false)
+  const [minimoError, setMinimoError] = useState<string | null>(null)
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [espacos, setEspacos] = useState<Espaco[]>([])
   const [regrasDiarias, setRegrasDiarias] = useState<RegrasDiaria[]>([])
@@ -83,19 +84,45 @@ function NovaReservaForm() {
   const checkConflito = useCallback(async (entrada: string, saida: string, status: string) => {
     if (!entrada || !saida) return
     const supabase = createClient()
-    const query = supabase
+    const { data } = await supabase
       .from('reservas')
       .select('id')
       .lte('data_entrada', saida)
       .gte('data_saida', entrada)
       .eq('status', 'agendada')
-    const { data } = await query
     setConflito((data?.length ?? 0) > 0 && status === 'agendada')
   }, [])
 
+  const checkMinimosDiarias = useCallback((entrada: string, saida: string) => {
+    if (!entrada || !saida || saida <= entrada || regrasDiarias.length === 0) {
+      setMinimoError(null)
+      return
+    }
+    const cursor = new Date(entrada)
+    const end = new Date(saida)
+    let maxMinimo = 1
+    const diasComMinimo2 = []
+    while (cursor < end) {
+      const dia = cursor.getDay()
+      const regra = regrasDiarias.find(r => r.dia_semana === dia)
+      const min = regra?.minimo_diarias ?? 1
+      if (min > maxMinimo) maxMinimo = min
+      if (min >= 2) diasComMinimo2.push(regra?.nome_dia ?? '')
+      cursor.setDate(cursor.getDate() + 1)
+    }
+    const numDias = Math.floor((end.getTime() - new Date(entrada).getTime()) / 86400000)
+    if (numDias < maxMinimo) {
+      const dias = [...new Set(diasComMinimo2)].join(', ')
+      setMinimoError(`Mínimo de ${maxMinimo} diária(s) exigido (${dias} no período). SE(DIA_SEMANA >= Sexta; 2; 1)`)
+    } else {
+      setMinimoError(null)
+    }
+  }, [regrasDiarias])
+
   useEffect(() => {
     checkConflito(form.data_entrada, form.data_saida, form.status)
-  }, [form.data_entrada, form.data_saida, form.status, checkConflito])
+    checkMinimosDiarias(form.data_entrada, form.data_saida)
+  }, [form.data_entrada, form.data_saida, form.status, checkConflito, checkMinimosDiarias])
 
   function set(field: string, value: string | boolean) {
     setForm(f => ({ ...f, [field]: value }))
@@ -111,6 +138,7 @@ function NovaReservaForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (conflito) { setError('Conflito de datas com uma reserva agendada.'); return }
+    if (minimoError) { setError(minimoError); return }
     if (!form.cliente_id) { setError('Selecione um cliente.'); return }
     if (form.data_saida <= form.data_entrada) { setError('Data de saída deve ser após a entrada.'); return }
     setError('')
@@ -218,6 +246,12 @@ function NovaReservaForm() {
               <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 <AlertTriangle size={16} className="text-red-500 shrink-0" />
                 <p className="text-sm text-red-700">Conflito! Há uma reserva <strong>agendada</strong> nesse período.</p>
+              </div>
+            )}
+            {minimoError && (
+              <div className="flex items-start gap-2 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
+                <AlertTriangle size={16} className="text-yellow-600 shrink-0 mt-0.5" />
+                <p className="text-sm text-yellow-800">{minimoError}</p>
               </div>
             )}
 
@@ -349,7 +383,7 @@ function NovaReservaForm() {
         )}
 
         <div className="flex gap-3">
-          <Button type="submit" loading={loading} disabled={conflito}>Criar Reserva</Button>
+          <Button type="submit" loading={loading} disabled={conflito || !!minimoError}>Criar Reserva</Button>
           <Link href="/clientes"><Button type="button" variant="secondary">Cancelar</Button></Link>
         </div>
       </form>

@@ -21,6 +21,7 @@ interface Convite {
 export default function ConvitesPage() {
   const [convites, setConvites] = useState<Convite[]>([])
   const [email, setEmail] = useState('')
+  const [role, setRole] = useState<string>('solicitante')
   const [loading, setLoading] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
@@ -46,6 +47,7 @@ export default function ConvitesPage() {
 
     await supabase.from('convites').insert({
       email: email || null,
+      role: role,
       criado_por: user.id,
     })
 
@@ -89,16 +91,28 @@ export default function ConvitesPage() {
           <h2 className="text-sm font-semibold text-[var(--gray-900)]">Novo Convite</h2>
         </CardHeader>
         <CardContent>
-          <form onSubmit={criarConvite} className="flex gap-3">
-            <Input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="E-mail (opcional)"
-              type="email"
-            />
-            <Button type="submit" loading={loading} className="shrink-0">
-              <Link2 size={16} /> Gerar
-            </Button>
+          <form onSubmit={criarConvite} className="space-y-3">
+            <div className="flex gap-3">
+              <Input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="E-mail (opcional)"
+                type="email"
+              />
+              <select
+                value={role}
+                onChange={e => setRole(e.target.value)}
+                className="border border-[var(--gray-200)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] shrink-0"
+              >
+                <option value="solicitante">Solicitante</option>
+                <option value="comercial">Comercial</option>
+                <option value="parceiro">Parceiro</option>
+                <option value="admin">Admin</option>
+              </select>
+              <Button type="submit" loading={loading} className="shrink-0">
+                <Link2 size={16} /> Gerar
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
