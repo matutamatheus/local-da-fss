@@ -7,6 +7,7 @@ import {
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  useDroppable,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
@@ -14,7 +15,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Building, Calendar, Mail, Phone, GripVertical, Users, Plus, Pencil, Check, X, Trash2 } from 'lucide-react'
+import { Building, Calendar, Mail, Phone, GripVertical, Plus, Pencil, Check, X, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -132,6 +133,7 @@ function KanbanColumn({
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(etapa.nome)
   const inputRef = useRef<HTMLInputElement>(null)
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: etapa.id })
 
   useEffect(() => {
     if (editing) inputRef.current?.focus()
@@ -201,7 +203,8 @@ function KanbanColumn({
       </div>
 
       <div
-        className="bg-[var(--gray-50)] rounded-xl p-2 min-h-[200px] border border-[var(--gray-200)]"
+        ref={setDropRef}
+        className={`bg-[var(--gray-50)] rounded-xl p-2 min-h-[200px] border border-[var(--gray-200)] transition-colors ${isOver ? 'bg-[var(--primary-light)]' : ''}`}
         style={{ borderTopColor: etapa.cor, borderTopWidth: 3 }}
       >
         <SortableContext items={clientes.map(c => c.id)} strategy={verticalListSortingStrategy}>
@@ -224,6 +227,7 @@ function NovaEtapaForm({ onAdd }: { onAdd: (etapa: CrmEtapa) => void }) {
   const [nome, setNome] = useState('')
   const [cor, setCor] = useState(COR_PADRAO[0])
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -234,14 +238,19 @@ function NovaEtapaForm({ onAdd }: { onAdd: (etapa: CrmEtapa) => void }) {
     const trimmed = nome.trim()
     if (!trimmed) return
     setSaving(true)
+    setError('')
     const supabase = createClient()
-    const { data, error } = await supabase
+    const { data, error: err } = await supabase
       .from('crm_etapas')
       .insert({ nome: trimmed, cor, ordem: 9999 })
       .select()
       .single()
     setSaving(false)
-    if (!error && data) {
+    if (err) {
+      setError('Erro ao criar coluna. Tente novamente.')
+      return
+    }
+    if (data) {
       onAdd(data)
       setNome('')
       setCor(COR_PADRAO[0])
@@ -285,6 +294,7 @@ function NovaEtapaForm({ onAdd }: { onAdd: (etapa: CrmEtapa) => void }) {
             ))}
           </div>
         </div>
+        {error && <p className="text-xs text-red-500">{error}</p>}
         <div className="flex gap-2">
           <button
             onClick={handleAdd}
@@ -294,7 +304,7 @@ function NovaEtapaForm({ onAdd }: { onAdd: (etapa: CrmEtapa) => void }) {
             {saving ? 'Salvando...' : 'Adicionar'}
           </button>
           <button
-            onClick={() => { setOpen(false); setNome('') }}
+            onClick={() => { setOpen(false); setNome(''); setError('') }}
             className="px-3 py-2 border border-[var(--gray-200)] rounded-lg text-sm text-[var(--gray-500)] hover:bg-[var(--gray-50)]"
           >
             Cancelar
@@ -371,16 +381,24 @@ export default function KanbanBoard({
   }
 
   async function handleRename(id: string, nome: string) {
+    const prev = etapas.find(e => e.id === id)
     setEtapas(prev => prev.map(e => e.id === id ? { ...e, nome } : e))
     const supabase = createClient()
-    await supabase.from('crm_etapas').update({ nome }).eq('id', id)
+    const { error } = await supabase.from('crm_etapas').update({ nome }).eq('id', id)
+    if (error && prev) {
+      setEtapas(p => p.map(e => e.id === id ? { ...e, nome: prev.nome } : e))
+    }
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Excluir esta coluna?')) return
+    const removed = etapas.find(e => e.id === id)
     setEtapas(prev => prev.filter(e => e.id !== id))
     const supabase = createClient()
-    await supabase.from('crm_etapas').delete().eq('id', id)
+    const { error } = await supabase.from('crm_etapas').delete().eq('id', id)
+    if (error && removed) {
+      setEtapas(prev => [...prev, removed].sort((a, b) => a.ordem - b.ordem))
+    }
   }
 
   function handleAdd(etapa: CrmEtapa) {
