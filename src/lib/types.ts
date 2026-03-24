@@ -60,6 +60,7 @@ export interface ConviteRegistro {
   id: string
   token: string
   email?: string
+  role: UserRole
   usado: boolean
   criado_por: string
   created_at: string

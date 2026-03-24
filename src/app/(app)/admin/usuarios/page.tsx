@@ -56,9 +56,13 @@ export default function UsuariosPage() {
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                     user.role === 'admin'
                       ? 'bg-purple-100 text-purple-800'
+                      : user.role === 'comercial'
+                      ? 'bg-blue-100 text-blue-800'
+                      : user.role === 'parceiro'
+                      ? 'bg-orange-100 text-orange-800'
                       : 'bg-[var(--primary-light)] text-[var(--primary)]'
                   }`}>
-                    {user.role === 'admin' ? 'Admin' : 'Solicitante'}
+                    {{ admin: 'Admin', comercial: 'Comercial', parceiro: 'Parceiro', solicitante: 'Solicitante' }[user.role] ?? user.role}
                   </span>
                   <p className="text-xs text-[var(--gray-400)] mt-1">
                     {format(new Date(user.created_at), "dd/MM/yyyy", { locale: ptBR })}

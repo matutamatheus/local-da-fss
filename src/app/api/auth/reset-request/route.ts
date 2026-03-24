@@ -66,10 +66,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!profile?.telefone) {
-      return NextResponse.json(
-        { error: 'Nenhum WhatsApp cadastrado nessa conta. Entre em contato com o administrador.' },
-        { status: 400 }
-      )
+      // Same response as non-existent email to prevent enumeration
+      return NextResponse.json({ success: true, masked: '****' })
     }
 
     const code = generateCode()

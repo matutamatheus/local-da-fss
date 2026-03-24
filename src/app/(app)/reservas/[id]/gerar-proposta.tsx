@@ -19,16 +19,18 @@ export default function GerarProposta({
   const [open, setOpen] = useState(false)
   const [descritivo, setDescritivo] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [propostaId, setPropostaId] = useState<string | null>(null)
   const router = useRouter()
 
   async function handleGerar() {
     setLoading(true)
+    setError('')
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setLoading(false); return }
+    if (!user) { setError('Não autenticado'); setLoading(false); return }
 
-    const { data } = await supabase.from('propostas').insert({
+    const { data, error: err } = await supabase.from('propostas').insert({
       reserva_id: reservaId,
       cliente_id: clienteId,
       valor_total: valorTotal ?? 0,
@@ -37,6 +39,10 @@ export default function GerarProposta({
     }).select().single()
 
     setLoading(false)
+    if (err) {
+      setError('Erro ao gerar proposta. Tente novamente.')
+      return
+    }
     if (data) {
       setPropostaId(data.id)
       router.refresh()
@@ -86,6 +92,9 @@ export default function GerarProposta({
         placeholder="• Locação do espaço principal&#10;• Infraestrutura básica&#10;• Estacionamento..."
         className="w-full border border-[var(--gray-200)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none font-mono"
       />
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+      )}
       <div className="flex gap-2">
         <button
           onClick={handleGerar}
@@ -95,7 +104,7 @@ export default function GerarProposta({
           <FileText size={15} /> {loading ? 'Gerando...' : 'Gerar PDF'}
         </button>
         <button
-          onClick={() => setOpen(false)}
+          onClick={() => { setOpen(false); setError('') }}
           className="px-4 py-2 border border-[var(--gray-200)] rounded-lg text-sm hover:bg-[var(--gray-50)]"
         >
           Cancelar

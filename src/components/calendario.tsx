@@ -137,10 +137,11 @@ export function Calendario({ isAdmin = false }: { isAdmin?: boolean }) {
   function handleDateClick(info: { dateStr: string }) {
     const date = info.dateStr
     setSelectedDate(date)
+    const clickedDate = new Date(date + 'T12:00:00')
     const dayEvents = events.filter(e => {
-      const start = e.start.substring(0, 10)
-      const end = e.end.substring(0, 10)
-      return date >= start && date < end
+      const start = new Date(e.start.substring(0, 10) + 'T00:00:00')
+      const end = new Date(e.end.substring(0, 10) + 'T00:00:00')
+      return clickedDate >= start && clickedDate < end
     })
     setDayReservas(dayEvents.map(e => ({
       id: e.id,

@@ -45,6 +45,24 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Proteger rotas /admin/* para apenas administradores
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
+  if (user && isAdminRoute) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role !== 'admin') {
+      const url = request.nextUrl.clone()
+      url.pathname = profile?.role === 'comercial' || profile?.role === 'parceiro'
+        ? '/clientes'
+        : '/dashboard'
+      return NextResponse.redirect(url)
+    }
+  }
+
   if (user && isPublicRoute) {
     const { data: profile } = await supabase
       .from('profiles')

@@ -187,8 +187,11 @@ export default function KanbanBoard({
     // Determine the target etapa
     let targetEtapaId: string | null = null
 
-    // Check if dropped on a column or a card within a column
-    if (etapas.find(e => e.id === overEtapaId)) {
+    // Check if dropped on the "sem etapa" column
+    if (overEtapaId === '__sem_etapa__') {
+      targetEtapaId = null
+    } else if (etapas.find(e => e.id === overEtapaId)) {
+      // Dropped on a column
       targetEtapaId = overEtapaId
     } else {
       // Dropped on a card — find that card's etapa

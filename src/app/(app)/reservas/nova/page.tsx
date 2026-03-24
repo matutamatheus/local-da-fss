@@ -22,6 +22,7 @@ function NovaReservaForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const clienteIdParam = searchParams.get('cliente')
+  const dataParam = searchParams.get('data')
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -37,7 +38,7 @@ function NovaReservaForm() {
   const [form, setForm] = useState({
     cliente_id: clienteIdParam ?? '',
     espaco_id: '',
-    data_entrada: '',
+    data_entrada: dataParam ?? '',
     data_saida: '',
     num_participantes: '1',
     audiovisual: false,

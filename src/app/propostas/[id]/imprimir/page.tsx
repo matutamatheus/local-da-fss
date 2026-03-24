@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import PrintButton from './print-button'
@@ -23,6 +23,10 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll: () => cookieStore.getAll() } }
   )
+
+  // Auth check — proposal pages require authentication
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   const [{ data: proposta }, { data: regrasComerciais }] = await Promise.all([
     supabase
