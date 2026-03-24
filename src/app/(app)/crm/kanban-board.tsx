@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -14,7 +14,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { Building, Calendar, Mail, Phone, GripVertical, Users } from 'lucide-react'
+import { Building, Calendar, Mail, Phone, GripVertical, Users, Plus, Pencil, Check, X, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -45,6 +45,11 @@ const produtoLabel: Record<string, string> = {
   ativacao: 'Ativação',
   outro: 'Outro',
 }
+
+const COR_PADRAO = [
+  '#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444',
+  '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#84cc16',
+]
 
 function ClienteCardItem({ cliente, isDragging }: { cliente: ClienteCard; isDragging?: boolean }) {
   return (
@@ -116,20 +121,83 @@ function SortableCard({ cliente }: { cliente: ClienteCard }) {
 function KanbanColumn({
   etapa,
   clientes,
+  onRename,
+  onDelete,
 }: {
   etapa: CrmEtapa
   clientes: ClienteCard[]
+  onRename?: (id: string, nome: string) => void
+  onDelete?: (id: string) => void
 }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(etapa.nome)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus()
+  }, [editing])
+
+  const isSemEtapa = etapa.id === '__sem_etapa__'
+
+  function handleSave() {
+    const trimmed = draft.trim()
+    if (trimmed && trimmed !== etapa.nome && onRename) {
+      onRename(etapa.id, trimmed)
+    }
+    setEditing(false)
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') handleSave()
+    if (e.key === 'Escape') { setDraft(etapa.nome); setEditing(false) }
+  }
+
   return (
     <div className="flex-shrink-0 w-[280px]">
-      <div
-        className="flex items-center gap-2 mb-3 px-1"
-      >
-        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: etapa.cor }} />
-        <h3 className="text-sm font-semibold text-[var(--gray-700)]">{etapa.nome}</h3>
-        <span className="ml-auto text-xs bg-[var(--gray-100)] text-[var(--gray-500)] px-2 py-0.5 rounded-full">
-          {clientes.length}
-        </span>
+      <div className="flex items-center gap-2 mb-3 px-1 group/header">
+        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: etapa.cor }} />
+        {editing && !isSemEtapa ? (
+          <>
+            <input
+              ref={inputRef}
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-1 text-sm font-semibold text-[var(--gray-700)] border-b border-[var(--primary)] outline-none bg-transparent"
+            />
+            <button onClick={handleSave} className="text-[var(--primary)] hover:opacity-70">
+              <Check size={14} />
+            </button>
+            <button onClick={() => { setDraft(etapa.nome); setEditing(false) }} className="text-[var(--gray-400)] hover:opacity-70">
+              <X size={14} />
+            </button>
+          </>
+        ) : (
+          <>
+            <h3 className="text-sm font-semibold text-[var(--gray-700)] flex-1 truncate">{etapa.nome}</h3>
+            <span className="text-xs bg-[var(--gray-100)] text-[var(--gray-500)] px-2 py-0.5 rounded-full">
+              {clientes.length}
+            </span>
+            {!isSemEtapa && onRename && (
+              <button
+                onClick={() => { setDraft(etapa.nome); setEditing(true) }}
+                className="opacity-0 group-hover/header:opacity-100 transition-opacity text-[var(--gray-400)] hover:text-[var(--gray-600)]"
+                title="Renomear coluna"
+              >
+                <Pencil size={12} />
+              </button>
+            )}
+            {!isSemEtapa && onDelete && clientes.length === 0 && (
+              <button
+                onClick={() => onDelete(etapa.id)}
+                className="opacity-0 group-hover/header:opacity-100 transition-opacity text-red-400 hover:text-red-600"
+                title="Excluir coluna"
+              >
+                <Trash2 size={12} />
+              </button>
+            )}
+          </>
+        )}
       </div>
 
       <div
@@ -151,13 +219,100 @@ function KanbanColumn({
   )
 }
 
+function NovaEtapaForm({ onAdd }: { onAdd: (etapa: CrmEtapa) => void }) {
+  const [open, setOpen] = useState(false)
+  const [nome, setNome] = useState('')
+  const [cor, setCor] = useState(COR_PADRAO[0])
+  const [saving, setSaving] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (open) inputRef.current?.focus()
+  }, [open])
+
+  async function handleAdd() {
+    const trimmed = nome.trim()
+    if (!trimmed) return
+    setSaving(true)
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('crm_etapas')
+      .insert({ nome: trimmed, cor, ordem: 9999 })
+      .select()
+      .single()
+    setSaving(false)
+    if (!error && data) {
+      onAdd(data)
+      setNome('')
+      setCor(COR_PADRAO[0])
+      setOpen(false)
+    }
+  }
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="flex-shrink-0 w-[280px] flex items-center gap-2 border-2 border-dashed border-[var(--gray-200)] rounded-xl p-4 text-sm text-[var(--gray-400)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors self-start mt-8"
+      >
+        <Plus size={16} /> Nova coluna
+      </button>
+    )
+  }
+
+  return (
+    <div className="flex-shrink-0 w-[280px] self-start mt-8">
+      <div className="bg-white border border-[var(--gray-200)] rounded-xl p-4 shadow-sm space-y-3">
+        <p className="text-sm font-semibold text-[var(--gray-700)]">Nova coluna</p>
+        <input
+          ref={inputRef}
+          value={nome}
+          onChange={e => setNome(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setOpen(false) }}
+          placeholder="Nome da coluna"
+          className="w-full border border-[var(--gray-200)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+        />
+        <div>
+          <p className="text-xs text-[var(--gray-500)] mb-1.5">Cor</p>
+          <div className="flex flex-wrap gap-2">
+            {COR_PADRAO.map(c => (
+              <button
+                key={c}
+                onClick={() => setCor(c)}
+                className={`w-6 h-6 rounded-full border-2 transition-transform ${cor === c ? 'border-[var(--gray-900)] scale-110' : 'border-transparent'}`}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handleAdd}
+            disabled={saving || !nome.trim()}
+            className="flex-1 bg-[var(--primary)] text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
+          >
+            {saving ? 'Salvando...' : 'Adicionar'}
+          </button>
+          <button
+            onClick={() => { setOpen(false); setNome('') }}
+            className="px-3 py-2 border border-[var(--gray-200)] rounded-lg text-sm text-[var(--gray-500)] hover:bg-[var(--gray-50)]"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function KanbanBoard({
-  etapas,
+  etapas: initialEtapas,
   clientes: initialClientes,
 }: {
   etapas: CrmEtapa[]
   clientes: ClienteCard[]
 }) {
+  const [etapas, setEtapas] = useState(initialEtapas)
   const [clientes, setClientes] = useState(initialClientes)
   const [activeId, setActiveId] = useState<string | null>(null)
 
@@ -184,17 +339,13 @@ export default function KanbanBoard({
     const activeClienteId = active.id as string
     const overEtapaId = over.id as string
 
-    // Determine the target etapa
     let targetEtapaId: string | null = null
 
-    // Check if dropped on the "sem etapa" column
     if (overEtapaId === '__sem_etapa__') {
       targetEtapaId = null
     } else if (etapas.find(e => e.id === overEtapaId)) {
-      // Dropped on a column
       targetEtapaId = overEtapaId
     } else {
-      // Dropped on a card — find that card's etapa
       const targetCliente = clientes.find(c => c.id === overEtapaId)
       targetEtapaId = targetCliente?.crm_etapa_id ?? null
     }
@@ -202,12 +353,10 @@ export default function KanbanBoard({
     const activeCliente = clientes.find(c => c.id === activeClienteId)
     if (!activeCliente || activeCliente.crm_etapa_id === targetEtapaId) return
 
-    // Optimistic update
     setClientes(prev =>
       prev.map(c => c.id === activeClienteId ? { ...c, crm_etapa_id: targetEtapaId ?? undefined } : c)
     )
 
-    // Persist
     const supabase = createClient()
     const { error } = await supabase
       .from('clientes')
@@ -215,11 +364,27 @@ export default function KanbanBoard({
       .eq('id', activeClienteId)
 
     if (error) {
-      // Revert on error
       setClientes(prev =>
         prev.map(c => c.id === activeClienteId ? { ...c, crm_etapa_id: activeCliente.crm_etapa_id } : c)
       )
     }
+  }
+
+  async function handleRename(id: string, nome: string) {
+    setEtapas(prev => prev.map(e => e.id === id ? { ...e, nome } : e))
+    const supabase = createClient()
+    await supabase.from('crm_etapas').update({ nome }).eq('id', id)
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Excluir esta coluna?')) return
+    setEtapas(prev => prev.filter(e => e.id !== id))
+    const supabase = createClient()
+    await supabase.from('crm_etapas').delete().eq('id', id)
+  }
+
+  function handleAdd(etapa: CrmEtapa) {
+    setEtapas(prev => [...prev, etapa])
   }
 
   const activeCliente = activeId ? clientes.find(c => c.id === activeId) : null
@@ -227,12 +392,14 @@ export default function KanbanBoard({
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="overflow-x-auto pb-4">
-        <div className="flex gap-4 min-w-max">
+        <div className="flex gap-4 min-w-max items-start">
           {etapas.map(etapa => (
             <KanbanColumn
               key={etapa.id}
               etapa={etapa}
               clientes={getClientesByEtapa(etapa.id)}
+              onRename={handleRename}
+              onDelete={handleDelete}
             />
           ))}
           {semEtapa.length > 0 && (
@@ -241,6 +408,7 @@ export default function KanbanBoard({
               clientes={semEtapa}
             />
           )}
+          <NovaEtapaForm onAdd={handleAdd} />
         </div>
       </div>
 
