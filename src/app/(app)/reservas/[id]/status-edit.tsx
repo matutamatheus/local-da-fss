@@ -4,13 +4,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Edit2 } from 'lucide-react'
+import { RESERVA_STATUS_HEX, RESERVA_STATUS_LABEL } from '@/lib/status-colors'
 
-const statusOptions = [
-  { value: 'aberta', label: 'Aberta' },
-  { value: 'pre_reservada', label: 'Pré-reservada' },
-  { value: 'agendada', label: 'Agendada' },
-  { value: 'cancelada', label: 'Cancelada' },
-]
+const statusOptions = ['aberta', 'pre_reservada', 'agendada', 'cancelada']
 
 export default function ReservaStatusEdit({
   reservaId,
@@ -42,14 +38,15 @@ export default function ReservaStatusEdit({
       </button>
       {open && (
         <div className="absolute left-0 top-full mt-1 bg-white border border-[var(--gray-200)] rounded-lg shadow-lg z-10 overflow-hidden min-w-[160px]">
-          {statusOptions.filter(s => s.value !== currentStatus).map(s => (
+          {statusOptions.filter(s => s !== currentStatus).map(s => (
             <button
-              key={s.value}
-              onClick={() => changeStatus(s.value)}
+              key={s}
+              onClick={() => changeStatus(s)}
               disabled={loading}
-              className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--gray-50)] transition-colors"
+              className="w-full text-left px-4 py-2.5 text-sm hover:bg-[var(--gray-50)] transition-colors flex items-center gap-2"
             >
-              {s.label}
+              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: RESERVA_STATUS_HEX[s] }} />
+              {RESERVA_STATUS_LABEL[s]}
             </button>
           ))}
         </div>

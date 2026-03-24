@@ -8,20 +8,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import ReservaStatusEdit from './status-edit'
 import GerarProposta from './gerar-proposta'
-
-const statusLabel: Record<string, string> = {
-  aberta: 'Aberta',
-  pre_reservada: 'Pré-reservada',
-  agendada: 'Agendada',
-  cancelada: 'Cancelada',
-}
-
-const statusColor: Record<string, string> = {
-  aberta: 'bg-blue-100 text-blue-700',
-  pre_reservada: 'bg-yellow-100 text-yellow-700',
-  agendada: 'bg-green-100 text-green-700',
-  cancelada: 'bg-gray-100 text-gray-500',
-}
+import { RESERVA_STATUS_COLOR, RESERVA_STATUS_LABEL } from '@/lib/status-colors'
 
 function formatDate(d?: string | null) {
   if (!d) return '—'
@@ -74,8 +61,8 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
               {cliente?.empresa ? ` — ${cliente.empresa}` : ''}
             </p>
           </div>
-          <span className={`text-sm px-3 py-1 rounded-full font-medium shrink-0 ${statusColor[reserva.status]}`}>
-            {statusLabel[reserva.status]}
+          <span className={`text-sm px-3 py-1 rounded-full font-medium shrink-0 ${RESERVA_STATUS_COLOR[reserva.status]}`}>
+            {RESERVA_STATUS_LABEL[reserva.status]}
           </span>
         </div>
       </div>
@@ -155,6 +142,11 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
             <h2 className="font-semibold text-[var(--gray-900)]">Propostas ({propostas?.length ?? 0})</h2>
           </CardHeader>
           <CardContent className="space-y-4">
+            {(!propostas || propostas.length === 0) && (
+              <p className="text-sm text-[var(--gray-400)] py-2">
+                Nenhuma proposta gerada ainda. Use o botão abaixo para gerar a primeira.
+              </p>
+            )}
             {propostas && propostas.length > 0 && (
               <div className="space-y-2">
                 {propostas.map(p => (

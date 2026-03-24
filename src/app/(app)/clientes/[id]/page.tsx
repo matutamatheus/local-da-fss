@@ -121,19 +121,34 @@ export default async function ClienteDetailPage({ params }: { params: Promise<{ 
               {cliente.email && (
                 <div>
                   <dt className="text-xs text-[var(--gray-500)] flex items-center gap-1"><Mail size={11} /> E-mail</dt>
-                  <dd className="text-sm text-[var(--gray-900)] mt-0.5">{cliente.email}</dd>
+                  <dd className="text-sm mt-0.5">
+                    <a href={`mailto:${cliente.email}`} className="text-[var(--primary)] hover:underline break-all">{cliente.email}</a>
+                  </dd>
                 </div>
               )}
               {cliente.telefone && (
                 <div>
                   <dt className="text-xs text-[var(--gray-500)] flex items-center gap-1"><Phone size={11} /> Telefone</dt>
-                  <dd className="text-sm text-[var(--gray-900)] mt-0.5">{cliente.telefone}</dd>
+                  <dd className="text-sm mt-0.5 flex items-center gap-2">
+                    <a href={`tel:${cliente.telefone}`} className="text-[var(--primary)] hover:underline">{cliente.telefone}</a>
+                    <a
+                      href={`https://wa.me/55${cliente.telefone.replace(/\D/g, '')}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full hover:bg-green-200 transition-colors"
+                    >WhatsApp</a>
+                  </dd>
                 </div>
               )}
               {cliente.site && (
                 <div>
                   <dt className="text-xs text-[var(--gray-500)] flex items-center gap-1"><Globe size={11} /> Site</dt>
-                  <dd className="text-sm text-[var(--gray-900)] mt-0.5 truncate">{cliente.site}</dd>
+                  <dd className="text-sm mt-0.5 truncate">
+                    <a
+                      href={cliente.site.startsWith('http') ? cliente.site : `https://${cliente.site}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="text-[var(--primary)] hover:underline"
+                    >{cliente.site}</a>
+                  </dd>
                 </div>
               )}
               <div>

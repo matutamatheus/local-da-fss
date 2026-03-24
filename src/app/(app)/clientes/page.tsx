@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { PlusCircle, Search, Phone, Mail, Globe, Building } from 'lucide-react'
+import { PlusCircle, Search, Phone, Mail, Globe, Building, Users } from 'lucide-react'
 import { Cliente } from '@/lib/types'
 
 async function getClientes(search: string) {
@@ -89,9 +89,24 @@ export default async function ClientesPage({
       </div>
 
       {clientes.length === 0 ? (
-        <div className="text-center py-16 text-[var(--gray-400)]">
-          <p className="text-lg font-medium mb-1">Nenhum cliente encontrado</p>
-          <p className="text-sm">Cadastre o primeiro cliente clicando em "Novo Cliente"</p>
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--gray-100)] flex items-center justify-center mb-4">
+            <Users size={28} className="text-[var(--gray-400)]" />
+          </div>
+          <p className="text-lg font-semibold text-[var(--gray-700)] mb-1">
+            {search || soFS ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
+          </p>
+          <p className="text-sm text-[var(--gray-400)] mb-5">
+            {search || soFS ? 'Tente ajustar os filtros de busca.' : 'Comece cadastrando o primeiro cliente da sua carteira.'}
+          </p>
+          {!search && !soFS && (
+            <Link
+              href="/clientes/novo"
+              className="flex items-center gap-2 bg-[var(--primary)] text-white px-4 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              <PlusCircle size={16} /> Novo Cliente
+            </Link>
+          )}
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

@@ -114,7 +114,7 @@ function NovaReservaForm() {
     const numDias = Math.floor((end.getTime() - new Date(entrada).getTime()) / 86400000)
     if (numDias < maxMinimo) {
       const dias = [...new Set(diasComMinimo2)].join(', ')
-      setMinimoError(`Mínimo de ${maxMinimo} diária(s) exigido (${dias} no período). SE(DIA_SEMANA >= Sexta; 2; 1)`)
+      setMinimoError(`Mínimo de ${maxMinimo} diária(s) necessárias para reservas que incluem ${dias}.`)
     } else {
       setMinimoError(null)
     }

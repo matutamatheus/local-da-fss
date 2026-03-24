@@ -2,16 +2,18 @@
 
 import { useState } from 'react'
 import { Sidebar } from './sidebar'
+import { OnboardingTour } from './onboarding-tour'
 import { UserRole } from '@/lib/types'
 import { Menu } from 'lucide-react'
 
 interface AppShellProps {
   role: UserRole
   userName: string
+  userId: string
   children: React.ReactNode
 }
 
-export function AppShell({ role, userName, children }: AppShellProps) {
+export function AppShell({ role, userName, userId, children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
@@ -40,6 +42,8 @@ export function AppShell({ role, userName, children }: AppShellProps) {
       <main className="lg:ml-[var(--sidebar-width)] p-4 pt-18 lg:pt-6 lg:p-8">
         {children}
       </main>
+
+      <OnboardingTour userId={userId} role={role} />
     </div>
   )
 }

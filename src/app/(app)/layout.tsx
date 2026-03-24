@@ -17,7 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!profile) redirect('/login')
 
   return (
-    <AppShell role={profile.role} userName={profile.nome}>
+    <AppShell role={profile.role} userName={profile.nome} userId={user.id}>
       {children}
     </AppShell>
   )
