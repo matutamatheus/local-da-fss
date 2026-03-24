@@ -47,7 +47,7 @@ export default function RegistroForm() {
     verificarToken()
   }, [token])
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
 
@@ -89,7 +89,12 @@ export default function RegistroForm() {
         .eq('token', token)
     }
 
-    router.push('/dashboard')
+    const destino =
+      inviteRole === 'admin' ? '/admin' :
+      inviteRole === 'comercial' || inviteRole === 'parceiro' ? '/clientes' :
+      '/dashboard'
+
+    router.push(destino)
     router.refresh()
   }
 
