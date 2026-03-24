@@ -145,25 +145,26 @@ const ROLE_LABEL: Record<UserRole, string> = {
   solicitante: 'Solicitante',
 }
 
-const STORAGE_KEY = (userId: string) => `onboarding_done_${userId}`
+export const ONBOARDING_KEY = (userId: string) => `onboarding_done_${userId}`
 
-export function OnboardingTour({ userId, role }: { userId: string; role: UserRole }) {
-  const [visible, setVisible] = useState(false)
+export function OnboardingTour({
+  open,
+  onClose,
+  role,
+}: {
+  open: boolean
+  onClose: () => void
+  role: UserRole
+}) {
   const [step, setStep] = useState(0)
   const steps = STEPS[role] ?? STEPS.solicitante
 
+  // Reset step when tour opens
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    const done = localStorage.getItem(STORAGE_KEY(userId))
-    if (!done) setVisible(true)
-  }, [userId])
+    if (open) setStep(0)
+  }, [open])
 
-  function finish() {
-    localStorage.setItem(STORAGE_KEY(userId), '1')
-    setVisible(false)
-  }
-
-  if (!visible) return null
+  if (!open) return null
 
   const current = steps[step]
   const isLast = step === steps.length - 1
@@ -172,7 +173,7 @@ export function OnboardingTour({ userId, role }: { userId: string; role: UserRol
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={finish} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Card */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
@@ -188,7 +189,7 @@ export function OnboardingTour({ userId, role }: { userId: string; role: UserRol
             {ROLE_LABEL[role]}
           </span>
           <button
-            onClick={finish}
+            onClick={onClose}
             className="text-[var(--gray-400)] hover:text-[var(--gray-700)] transition-colors"
             title="Pular tour"
           >
@@ -243,7 +244,7 @@ export function OnboardingTour({ userId, role }: { userId: string; role: UserRol
               </button>
             ) : (
               <button
-                onClick={finish}
+                onClick={onClose}
                 className="px-4 py-2.5 text-sm text-[var(--gray-400)] hover:text-[var(--gray-600)] transition-colors"
               >
                 Pular
@@ -251,7 +252,7 @@ export function OnboardingTour({ userId, role }: { userId: string; role: UserRol
             )}
 
             <button
-              onClick={isLast ? finish : () => setStep(s => s + 1)}
+              onClick={isLast ? onClose : () => setStep(s => s + 1)}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: accentColor }}
             >
