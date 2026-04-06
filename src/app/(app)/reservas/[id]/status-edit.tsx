@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Edit2 } from 'lucide-react'
 import { RESERVA_STATUS_HEX, RESERVA_STATUS_LABEL } from '@/lib/status-colors'
+import { showToast } from '@/components/ui/toast'
 
 const statusOptions = ['aberta', 'pre_reservada', 'agendada', 'cancelada']
 
@@ -22,9 +23,14 @@ export default function ReservaStatusEdit({
   async function changeStatus(newStatus: string) {
     setLoading(true)
     const supabase = createClient()
-    await supabase.from('reservas').update({ status: newStatus }).eq('id', reservaId)
+    const { error } = await supabase.from('reservas').update({ status: newStatus }).eq('id', reservaId)
     setLoading(false)
     setOpen(false)
+    if (error) {
+      showToast('error', 'Erro ao alterar status da reserva')
+      return
+    }
+    showToast('success', `Status alterado para ${RESERVA_STATUS_LABEL[newStatus]}`)
     router.refresh()
   }
 

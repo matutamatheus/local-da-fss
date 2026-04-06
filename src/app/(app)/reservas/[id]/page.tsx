@@ -122,12 +122,22 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
                     <span>{formatCurrency(reserva.valor_diaria)}</span>
                   </div>
                 )}
-                {reserva.desconto_aplicado > 0 && reserva.desconto_aplicado < 100 && (
-                  <div className="flex justify-between text-sm text-red-600">
-                    <span>Desconto ({reserva.desconto_aplicado}%)</span>
-                    <span>— {formatCurrency((reserva.valor_total ?? 0) / (1 - reserva.desconto_aplicado / 100) * (reserva.desconto_aplicado / 100))}</span>
-                  </div>
-                )}
+                {reserva.desconto_aplicado > 0 && reserva.desconto_aplicado < 100 && (() => {
+                  const total = reserva.valor_total ?? 0
+                  const subtotal = total / (1 - reserva.desconto_aplicado / 100)
+                  return (
+                    <>
+                      <div className="flex justify-between text-sm text-[var(--gray-500)]">
+                        <span>Subtotal</span>
+                        <span>{formatCurrency(subtotal)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-[#C0392B]">
+                        <span>Desconto ({reserva.desconto_aplicado}%)</span>
+                        <span>− {formatCurrency(subtotal - total)}</span>
+                      </div>
+                    </>
+                  )
+                })()}
                 <div className="flex justify-between font-bold text-base border-t border-[var(--gray-200)] pt-2 mt-2">
                   <span>Total da reserva</span>
                   <span className="text-[var(--primary)]">{formatCurrency(reserva.valor_total)}</span>

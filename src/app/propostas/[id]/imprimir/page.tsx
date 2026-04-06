@@ -70,7 +70,7 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
   const valorTotal = proposta.valor_total ?? reserva?.valor_total ?? 0
   const valorDiaria = reserva?.valor_diaria
   const desconto = reserva?.desconto_aplicado ?? 0
-  const subtotal = desconto > 0 ? valorTotal / (1 - desconto / 100) : valorTotal
+  const subtotal = desconto > 0 && desconto < 100 ? valorTotal / (1 - desconto / 100) : valorTotal
 
   return (
     <html lang="pt-BR">

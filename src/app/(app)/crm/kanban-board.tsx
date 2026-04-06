@@ -393,7 +393,9 @@ export default function KanbanBoard({
         setClientes(prev =>
           prev.map(c => c.id === activeClienteId ? { ...c, crm_etapa_id: previousEtapaId } : c)
         )
-        supabase.from('clientes').update({ crm_etapa_id: previousEtapaId ?? null }).eq('id', activeClienteId)
+        supabase.from('clientes').update({ crm_etapa_id: previousEtapaId ?? null }).eq('id', activeClienteId).then(({ error }) => {
+          if (error) showToast('error', 'Erro ao desfazer movimentação')
+        })
       })
     }
   }

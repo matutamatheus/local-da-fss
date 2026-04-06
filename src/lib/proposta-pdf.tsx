@@ -1,4 +1,3 @@
-import React from 'react'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 
 const PRIMARY = '#0B3D91'
@@ -68,7 +67,7 @@ export function PropostaPDF(data: PropostaPDFData) {
     ? data.descritivo.split('\n').map(l => l.trim()).filter(Boolean)
     : []
 
-  const subtotal = data.descontoAplicado > 0
+  const subtotal = data.descontoAplicado > 0 && data.descontoAplicado < 100
     ? data.valorTotal / (1 - data.descontoAplicado / 100)
     : data.valorTotal
 
