@@ -2,27 +2,41 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #1a1a2e;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-light: #dbeafe;
-  --success: #16a34a;
-  --success-light: #dcfce7;
-  --danger: #dc2626;
-  --danger-light: #fee2e2;
-  --warning: #f59e0b;
-  --warning-light: #fef3c7;
-  --gray-50: #f9fafb;
-  --gray-100: #f3f4f6;
-  --gray-200: #e5e7eb;
-  --gray-300: #d1d5db;
-  --gray-400: #9ca3af;
-  --gray-500: #6b7280;
-  --gray-600: #4b5563;
+  --foreground: #2C3E50;
+  --primary: #0B3D91;
+  --primary-hover: #092f73;
+  --primary-light: #d6e4f7;
+  --secondary: #FFC857;
+  --secondary-hover: #e6b34e;
+  --secondary-light: #fff5d9;
+  --success: #27AE60;
+  --success-light: #d4efdf;
+  --danger: #C0392B;
+  --danger-light: #f5d0cc;
+  --warning: #F39C12;
+  --warning-light: #fdebd0;
+  --gray-50: #F4F6F8;
+  --gray-100: #ebeef2;
+  --gray-200: #dce1e8;
+  --gray-300: #c5cdd6;
+  --gray-400: #8d99a8;
+  --gray-500: #6b7a8d;
+  --gray-600: #4a5568;
   --gray-700: #374151;
-  --gray-800: #1f2937;
-  --gray-900: #111827;
+  --gray-800: #2C3E50;
+  --gray-900: #1a252f;
   --sidebar-width: 260px;
+
+  /* Status colors */
+  --status-agendada: #C0392B;
+  --status-agendada-light: #f5d0cc;
+  --status-pre-reservada: #F39C12;
+  --status-pre-reservada-light: #fdebd0;
+  --status-aberta: #27AE60;
+  --status-aberta-light: #d4efdf;
+  --status-cancelada: #7F8C8D;
+  --status-cancelada-light: #e8eaeb;
+  --status-bloqueio: #7F8C8D;
 }
 
 @theme inline {
@@ -37,8 +51,11 @@
   --color-danger-light: var(--danger-light);
   --color-warning: var(--warning);
   --color-warning-light: var(--warning-light);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-light: var(--secondary-light);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-roboto-mono);
 }
 
 body {
@@ -85,6 +102,12 @@ body {
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
   }
+}
+
+/* Shimmer animation for skeletons */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 /* Modal responsivo */

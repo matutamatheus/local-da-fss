@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ArrowLeft, AlertTriangle, CheckCircle, Mic, Calculator } from 'lucide-react'
 import Link from 'next/link'
 import { calcularPrecificacao, formatCurrency } from '@/lib/pricing'
+import { logAudit } from '@/lib/audit'
 import type { Cliente, Espaco, RegrasDiaria, MultiplicadorOcupacao, MultiplicadorProximidade } from '@/lib/types'
 
 const statusOptions = [
@@ -34,6 +35,8 @@ function NovaReservaForm() {
   const [multOcupacao, setMultOcupacao] = useState<MultiplicadorOcupacao[]>([])
   const [multProximidade, setMultProximidade] = useState<MultiplicadorProximidade[]>([])
   const [busca, setBusca] = useState('')
+  const [datasAlternativas, setDatasAlternativas] = useState<{ entrada: string; saida: string }[]>([])
+
 
   const [form, setForm] = useState({
     cliente_id: clienteIdParam ?? '',
@@ -91,7 +94,43 @@ function NovaReservaForm() {
       .lte('data_entrada', saida)
       .gte('data_saida', entrada)
       .eq('status', 'agendada')
-    setConflito((data?.length ?? 0) > 0 && status === 'agendada')
+    const hasConflict = (data?.length ?? 0) > 0 && status === 'agendada'
+    setConflito(hasConflict)
+    if (hasConflict && entrada && saida) {
+      findAlternativas(entrada, saida)
+    } else {
+      setDatasAlternativas([])
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const findAlternativas = useCallback(async (entrada: string, saida: string) => {
+    const duracao = Math.ceil((new Date(saida).getTime() - new Date(entrada).getTime()) / 86400000)
+    if (duracao <= 0) return
+    const supabase = createClient()
+    const alt: { entrada: string; saida: string }[] = []
+    const baseDate = new Date(entrada)
+
+    for (let offset = 1; offset <= 30 && alt.length < 3; offset++) {
+      const tryStart = new Date(baseDate)
+      tryStart.setDate(tryStart.getDate() + offset)
+      const tryEnd = new Date(tryStart)
+      tryEnd.setDate(tryEnd.getDate() + duracao)
+      const s = tryStart.toISOString().slice(0, 10)
+      const e = tryEnd.toISOString().slice(0, 10)
+
+      const { data: conflicts } = await supabase
+        .from('reservas')
+        .select('id')
+        .lte('data_entrada', e)
+        .gte('data_saida', s)
+        .eq('status', 'agendada')
+        .limit(1)
+
+      if (!conflicts?.length) {
+        alt.push({ entrada: s, saida: e })
+      }
+    }
+    setDatasAlternativas(alt)
   }, [])
 
   const checkMinimosDiarias = useCallback((entrada: string, saida: string) => {
@@ -166,6 +205,15 @@ function NovaReservaForm() {
 
     if (err) { setError(err.message); setLoading(false); return }
 
+    // Audit log
+    await logAudit(supabase, {
+      userId: user.id,
+      acao: 'criar_reserva',
+      entidade: 'reserva',
+      entidadeId: reserva.id,
+      detalhes: { cliente_id: form.cliente_id, status: form.status, data_entrada: form.data_entrada, data_saida: form.data_saida },
+    })
+
     // Create proposta if descritivo provided
     if (form.descritivo.trim() && reserva) {
       await supabase.from('propostas').insert({
@@ -174,6 +222,13 @@ function NovaReservaForm() {
         valor_total: pricing?.total ?? 0,
         descritivo: form.descritivo.trim(),
         criado_por: user.id,
+      })
+      await logAudit(supabase, {
+        userId: user.id,
+        acao: 'gerar_proposta',
+        entidade: 'proposta',
+        entidadeId: reserva.id,
+        detalhes: { cliente_id: form.cliente_id, valor: pricing?.total },
       })
     }
 
@@ -244,9 +299,31 @@ function NovaReservaForm() {
             </div>
 
             {conflito && (
-              <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                <AlertTriangle size={16} className="text-red-500 shrink-0" />
-                <p className="text-sm text-red-700">Conflito! Há uma reserva <strong>agendada</strong> nesse período.</p>
+              <div className="bg-[var(--danger-light)] border border-[var(--danger)] rounded-lg px-3 py-2 space-y-2">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle size={16} className="text-[var(--danger)] shrink-0" />
+                  <p className="text-sm text-[#922b21]">Conflito! Há uma reserva <strong>agendada</strong> nesse período.</p>
+                </div>
+                {datasAlternativas.length > 0 && (
+                  <div className="pl-6">
+                    <p className="text-xs text-[#922b21] font-medium mb-1">Datas alternativas disponíveis:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {datasAlternativas.map((alt, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            set('data_entrada', alt.entrada)
+                            set('data_saida', alt.saida)
+                          }}
+                          className="text-xs bg-white border border-[var(--gray-200)] rounded-lg px-2.5 py-1.5 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-colors"
+                        >
+                          {new Date(alt.entrada + 'T12:00:00').toLocaleDateString('pt-BR')} — {new Date(alt.saida + 'T12:00:00').toLocaleDateString('pt-BR')}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             {minimoError && (

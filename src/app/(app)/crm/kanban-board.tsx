@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { Building, Calendar, Mail, Phone, GripVertical, Plus, Pencil, Check, X, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { showToast } from '@/components/ui/toast'
 
 interface CrmEtapa {
   id: string
@@ -363,6 +364,14 @@ export default function KanbanBoard({
     const activeCliente = clientes.find(c => c.id === activeClienteId)
     if (!activeCliente || activeCliente.crm_etapa_id === targetEtapaId) return
 
+    const previousEtapaId = activeCliente.crm_etapa_id
+    const previousEtapaNome = previousEtapaId
+      ? etapas.find(e => e.id === previousEtapaId)?.nome ?? 'Sem etapa'
+      : 'Sem etapa'
+    const targetEtapaNome = targetEtapaId
+      ? etapas.find(e => e.id === targetEtapaId)?.nome ?? 'Sem etapa'
+      : 'Sem etapa'
+
     setClientes(prev =>
       prev.map(c => c.id === activeClienteId ? { ...c, crm_etapa_id: targetEtapaId ?? undefined } : c)
     )
@@ -377,6 +386,15 @@ export default function KanbanBoard({
       setClientes(prev =>
         prev.map(c => c.id === activeClienteId ? { ...c, crm_etapa_id: activeCliente.crm_etapa_id } : c)
       )
+      showToast('error', 'Erro ao mover cliente')
+    } else {
+      showToast('success', `${activeCliente.nome}: ${previousEtapaNome} → ${targetEtapaNome}`, () => {
+        // Undo action
+        setClientes(prev =>
+          prev.map(c => c.id === activeClienteId ? { ...c, crm_etapa_id: previousEtapaId } : c)
+        )
+        supabase.from('clientes').update({ crm_etapa_id: previousEtapaId ?? null }).eq('id', activeClienteId)
+      })
     }
   }
 

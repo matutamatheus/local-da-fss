@@ -17,6 +17,8 @@ import {
   Settings,
   DollarSign,
   UserCog,
+  ShieldBan,
+  BarChart3,
   X,
 } from 'lucide-react'
 import { UserRole } from '@/lib/types'
@@ -66,6 +68,8 @@ const adminLinks = [
   { href: '/admin/convites', label: 'Convites', icon: Link2 },
   { href: '/admin/usuarios', label: 'Usuários', icon: UserCog },
   { href: '/admin/regras', label: 'Regras de Preço', icon: DollarSign },
+  { href: '/admin/bloqueios', label: 'Bloqueios', icon: ShieldBan },
+  { href: '/admin/relatorios', label: 'Relatórios', icon: BarChart3 },
   { href: '/especificacoes', label: 'Especificações', icon: Image },
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ]

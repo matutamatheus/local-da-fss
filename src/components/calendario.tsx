@@ -5,6 +5,7 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 import interactionPlugin from '@fullcalendar/interaction'
+import { motion, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -12,16 +13,17 @@ import { Download, CalendarPlus, UserPlus, X, ChevronRight, Users, Mic } from 'l
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-// Status colors
+// Status colors — PRD palette
 const RESERVA_COLORS: Record<string, { bg: string; border: string; text: string; label: string }> = {
-  agendada:     { bg: '#16a34a', border: '#14532d', text: '#fff', label: 'Agendada' },
-  pre_reservada:{ bg: '#d97706', border: '#92400e', text: '#fff', label: 'Pré-reservada' },
-  aberta:       { bg: '#2563eb', border: '#1e3a8a', text: '#fff', label: 'Aberta' },
-  cancelada:    { bg: '#9ca3af', border: '#6b7280', text: '#fff', label: 'Cancelada' },
+  agendada:     { bg: '#C0392B', border: '#922b21', text: '#fff', label: 'Agendada' },
+  pre_reservada:{ bg: '#F39C12', border: '#b7770a', text: '#fff', label: 'Pré-reservada' },
+  aberta:       { bg: '#27AE60', border: '#1e8449', text: '#fff', label: 'Aberta' },
+  cancelada:    { bg: '#7F8C8D', border: '#566573', text: '#fff', label: 'Cancelada' },
+  bloqueio:     { bg: '#7F8C8D', border: '#566573', text: '#fff', label: 'Bloqueio' },
   // legacy solicitacoes
-  aprovado:     { bg: '#16a34a', border: '#14532d', text: '#fff', label: 'Aprovado' },
-  pendente:     { bg: '#d97706', border: '#92400e', text: '#fff', label: 'Pendente' },
-  recusado:     { bg: '#dc2626', border: '#991b1b', text: '#fff', label: 'Recusado' },
+  aprovado:     { bg: '#27AE60', border: '#1e8449', text: '#fff', label: 'Aprovado' },
+  pendente:     { bg: '#F39C12', border: '#b7770a', text: '#fff', label: 'Pendente' },
+  recusado:     { bg: '#C0392B', border: '#922b21', text: '#fff', label: 'Recusado' },
 }
 
 interface CalEvent {
@@ -62,6 +64,7 @@ export function Calendario({ isAdmin = false }: { isAdmin?: boolean }) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [dayReservas, setDayReservas] = useState<DayReserva[]>([])
   const [panelOpen, setPanelOpen] = useState(false)
+  const [loadingEvents, setLoadingEvents] = useState(true)
   const calRef = useRef<FullCalendar>(null)
 
   useEffect(() => {
@@ -69,6 +72,7 @@ export function Calendario({ isAdmin = false }: { isAdmin?: boolean }) {
   }, [isAdmin]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadEvents() {
+    setLoadingEvents(true)
     const supabase = createClient()
     const mapped: CalEvent[] = []
 
@@ -131,7 +135,33 @@ export function Calendario({ isAdmin = false }: { isAdmin?: boolean }) {
       }
     }
 
+    // Load bloqueios
+    const { data: bloqueios } = await supabase
+      .from('bloqueios')
+      .select('id, data_inicio, data_fim, motivo')
+
+    if (bloqueios) {
+      for (const b of bloqueios) {
+        const col = RESERVA_COLORS.bloqueio
+        mapped.push({
+          id: `bloq_${b.id}`,
+          title: b.motivo || 'Bloqueio',
+          start: b.data_inicio,
+          end: b.data_fim,
+          backgroundColor: col.bg,
+          borderColor: col.border,
+          textColor: col.text,
+          extendedProps: {
+            tipo: 'reserva',
+            status: 'bloqueio',
+            espaco_nome: 'Bloqueio interno',
+          },
+        })
+      }
+    }
+
     setEvents(mapped)
+    setLoadingEvents(false)
   }
 
   function handleDateClick(info: { dateStr: string }) {
@@ -209,7 +239,24 @@ export function Calendario({ isAdmin = false }: { isAdmin?: boolean }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-[var(--gray-200)] p-4">
+      {loadingEvents && (
+        <div className="bg-white rounded-xl border border-[var(--gray-200)] p-4 mb-4">
+          <div className="flex items-center justify-between mb-6">
+            <div className="h-6 w-32 bg-[var(--gray-200)] rounded animate-pulse" />
+            <div className="flex gap-2">
+              <div className="h-8 w-20 bg-[var(--gray-200)] rounded animate-pulse" />
+              <div className="h-8 w-20 bg-[var(--gray-200)] rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {Array.from({ length: 35 }).map((_, i) => (
+              <div key={i} className="h-20 bg-[var(--gray-100)] rounded animate-pulse" />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className={`bg-white rounded-xl border border-[var(--gray-200)] p-4 ${loadingEvents ? 'hidden' : ''}`}>
         <FullCalendar
           ref={calRef}
           plugins={[dayGridPlugin, multiMonthPlugin, interactionPlugin]}
@@ -243,15 +290,25 @@ export function Calendario({ isAdmin = false }: { isAdmin?: boolean }) {
       </div>
 
       {/* Side Panel */}
+      <AnimatePresence>
       {panelOpen && (
         <>
           {/* Backdrop */}
-          <div
+          <motion.div
             className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             onClick={() => setPanelOpen(false)}
           />
           {/* Panel */}
-          <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-white border-l border-[var(--gray-200)] shadow-xl z-50 flex flex-col overflow-hidden">
+          <motion.div
+            className="fixed right-0 top-0 h-full w-full max-w-sm bg-white border-l border-[var(--gray-200)] shadow-xl z-50 flex flex-col overflow-hidden"
+            initial={{ x: 300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 300, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          >
             {/* Panel header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--gray-200)] bg-[var(--gray-50)]">
               <div>
@@ -349,9 +406,10 @@ export function Calendario({ isAdmin = false }: { isAdmin?: boolean }) {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         </>
       )}
+      </AnimatePresence>
     </div>
   )
 }

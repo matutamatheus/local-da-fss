@@ -5,6 +5,7 @@ import { Sidebar } from './sidebar'
 import { OnboardingTour, ONBOARDING_KEY } from './onboarding-tour'
 import { UserRole } from '@/lib/types'
 import { Menu, HelpCircle } from 'lucide-react'
+import { ToastContainer } from '@/components/ui/toast'
 
 interface AppShellProps {
   role: UserRole
@@ -76,6 +77,7 @@ export function AppShell({ role, userName, userId, children }: AppShellProps) {
       </main>
 
       <OnboardingTour open={tourOpen} onClose={closeTour} role={role} />
+      <ToastContainer />
     </div>
   )
 }
