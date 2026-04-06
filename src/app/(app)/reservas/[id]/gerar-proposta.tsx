@@ -3,24 +3,29 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { FileText, Send } from 'lucide-react'
+import { FileText, Send, Download, Loader2 } from 'lucide-react'
+import { showToast } from '@/components/ui/toast'
 
 export default function GerarProposta({
   reservaId,
   clienteId,
+  clienteNome,
   valorTotal,
   clienteEmail,
 }: {
   reservaId: string
   clienteId: string
+  clienteNome?: string | null
   valorTotal?: number | null
   clienteEmail?: string | null
 }) {
   const [open, setOpen] = useState(false)
   const [descritivo, setDescritivo] = useState('')
   const [loading, setLoading] = useState(false)
+  const [sendingEmail, setSendingEmail] = useState(false)
   const [error, setError] = useState('')
   const [propostaId, setPropostaId] = useState<string | null>(null)
+  const [pdfPath, setPdfPath] = useState<string | null>(null)
   const router = useRouter()
 
   async function handleGerar() {
@@ -30,6 +35,7 @@ export default function GerarProposta({
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setError('Não autenticado'); setLoading(false); return }
 
+    // 1. Criar proposta no DB
     const { data, error: err } = await supabase.from('propostas').insert({
       reserva_id: reservaId,
       cliente_id: clienteId,
@@ -38,34 +44,104 @@ export default function GerarProposta({
       criado_por: user.id,
     }).select().single()
 
-    setLoading(false)
     if (err) {
       setError('Erro ao gerar proposta. Tente novamente.')
+      setLoading(false)
       return
     }
+
     if (data) {
       setPropostaId(data.id)
+
+      // 2. Gerar PDF server-side e salvar no Storage
+      try {
+        const pdfRes = await fetch('/api/propostas/gerar-pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ propostaId: data.id }),
+        })
+        const pdfData = await pdfRes.json()
+        if (pdfData.success) {
+          setPdfPath(pdfData.pdf_path)
+          showToast('success', 'Proposta gerada e PDF salvo!')
+        } else {
+          showToast('warning', 'Proposta criada, mas erro ao gerar PDF. Use a versão web.')
+        }
+      } catch {
+        showToast('warning', 'Proposta criada, mas erro ao gerar PDF.')
+      }
+
       router.refresh()
+    }
+    setLoading(false)
+  }
+
+  async function handleDownloadPdf() {
+    if (!pdfPath) return
+    const supabase = createClient()
+    const { data } = await supabase.storage.from('propostas').createSignedUrl(pdfPath, 3600)
+    if (data?.signedUrl) {
+      window.open(data.signedUrl, '_blank')
+    }
+  }
+
+  async function handleEnviarEmail() {
+    if (!propostaId || !clienteEmail) return
+    setSendingEmail(true)
+
+    const propostaUrl = `${window.location.origin}/propostas/${propostaId}/imprimir`
+
+    const res = await fetch('/api/propostas/enviar-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        propostaId,
+        clienteEmail,
+        clienteNome: clienteNome ?? '',
+        propostaUrl,
+      }),
+    })
+
+    const data = await res.json()
+    setSendingEmail(false)
+
+    if (data.sent) {
+      showToast('success', `Email enviado para ${clienteEmail}`)
+    } else if (data.mailto) {
+      window.open(data.mailto, '_blank')
+      showToast('warning', 'Abrindo cliente de email (Resend não configurado)')
+    } else {
+      showToast('error', data.error || 'Erro ao enviar email')
     }
   }
 
   if (propostaId) {
     return (
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <a
           href={`/propostas/${propostaId}/imprimir`}
           target="_blank"
           className="flex items-center gap-2 px-4 py-2 bg-[var(--primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
         >
-          <FileText size={15} /> Abrir Proposta PDF
+          <FileText size={15} /> Ver Proposta
         </a>
-        {clienteEmail && (
-          <a
-            href={`mailto:${clienteEmail}?subject=Proposta - Full Sales&body=Segue em anexo a proposta de locação do espaço.`}
+        {pdfPath && (
+          <button
+            onClick={handleDownloadPdf}
             className="flex items-center gap-2 px-4 py-2 border border-[var(--gray-200)] rounded-lg text-sm hover:bg-[var(--gray-50)] transition-colors"
           >
-            <Send size={15} /> Enviar E-mail
-          </a>
+            <Download size={15} /> Download PDF
+          </button>
+        )}
+        {clienteEmail && (
+          <button
+            onClick={handleEnviarEmail}
+            disabled={sendingEmail}
+            className="flex items-center gap-2 px-4 py-2 border border-[var(--gray-200)] rounded-lg text-sm hover:bg-[var(--gray-50)] transition-colors disabled:opacity-50"
+          >
+            {sendingEmail ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
+            {sendingEmail ? 'Enviando...' : 'Enviar Email'}
+          </button>
         )}
       </div>
     )
@@ -93,7 +169,7 @@ export default function GerarProposta({
         className="w-full border border-[var(--gray-200)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none font-mono"
       />
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+        <p className="text-sm text-[#922b21] bg-[var(--danger-light)] border border-[var(--danger)] rounded-lg px-3 py-2">{error}</p>
       )}
       <div className="flex gap-2">
         <button
@@ -101,7 +177,8 @@ export default function GerarProposta({
           disabled={loading}
           className="flex items-center gap-2 px-4 py-2 bg-[var(--primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50"
         >
-          <FileText size={15} /> {loading ? 'Gerando...' : 'Gerar PDF'}
+          {loading ? <Loader2 size={15} className="animate-spin" /> : <FileText size={15} />}
+          {loading ? 'Gerando...' : 'Gerar PDF'}
         </button>
         <button
           onClick={() => { setOpen(false); setError('') }}

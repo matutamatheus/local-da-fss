@@ -24,7 +24,6 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
     { cookies: { getAll: () => cookieStore.getAll() } }
   )
 
-  // Auth check — proposal pages require authentication
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
@@ -81,35 +80,32 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
         <title>Proposta — Full Sales</title>
         <style>{`
           * { box-sizing: border-box; margin: 0; padding: 0; }
-          body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a2e; background: #fff; }
+          body { font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif; color: #2C3E50; background: #fff; }
           .page { max-width: 800px; margin: 0 auto; padding: 48px 40px; }
-          .header { border-bottom: 3px solid #6c5ce7; padding-bottom: 24px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start; }
-          .brand { }
-          .brand-name { font-size: 28px; font-weight: 900; color: #6c5ce7; letter-spacing: -0.5px; }
-          .brand-sub { font-size: 12px; color: #666; margin-top: 2px; }
-          .proposta-title { text-align: right; }
-          .proposta-title h1 { font-size: 13px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; }
-          .proposta-title p { font-size: 20px; font-weight: 800; color: #1a1a2e; margin-top: 4px; }
+          .header { border-bottom: 3px solid #0B3D91; padding-bottom: 24px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-start; }
+          .brand-name { font-size: 28px; font-weight: 900; color: #0B3D91; letter-spacing: -0.5px; }
+          .brand-sub { font-size: 12px; color: #4a5568; margin-top: 2px; }
+          .proposta-title h1 { font-size: 13px; font-weight: 700; color: #6b7a8d; text-transform: uppercase; letter-spacing: 1px; text-align: right; }
+          .proposta-title p { font-size: 20px; font-weight: 800; color: #2C3E50; margin-top: 4px; text-align: right; }
           .section { margin-bottom: 28px; }
-          .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #6c5ce7; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #e5e7eb; }
+          .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #0B3D91; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid #dce1e8; }
           .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-          .field label { font-size: 10px; font-weight: 600; color: #999; text-transform: uppercase; }
-          .field p { font-size: 14px; color: #1a1a2e; margin-top: 2px; }
-          .descritivo-list { list-style: none; space-y: 4px; }
+          .field label { font-size: 10px; font-weight: 600; color: #8d99a8; text-transform: uppercase; }
+          .field p { font-size: 14px; color: #2C3E50; margin-top: 2px; }
+          .descritivo-list { list-style: none; }
           .descritivo-list li { font-size: 13px; color: #374151; padding: 4px 0; padding-left: 16px; position: relative; }
-          .descritivo-list li::before { content: '•'; position: absolute; left: 0; color: #6c5ce7; font-weight: bold; }
+          .descritivo-list li::before { content: '•'; position: absolute; left: 0; color: #0B3D91; font-weight: bold; }
           .pricing-table { width: 100%; border-collapse: collapse; }
-          .pricing-table td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #f3f4f6; }
-          .pricing-table .label { color: #6b7280; }
+          .pricing-table td { padding: 8px 12px; font-size: 13px; border-bottom: 1px solid #ebeef2; }
+          .pricing-table .label { color: #6b7a8d; }
           .pricing-table .value { text-align: right; font-weight: 500; }
-          .pricing-total { background: #f5f3ff; }
-          .pricing-total td { font-size: 16px; font-weight: 800; color: #6c5ce7; padding: 12px 12px; border-bottom: none; }
-          .regras-block { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
+          .pricing-total { background: #d6e4f7; }
+          .pricing-total td { font-size: 16px; font-weight: 800; color: #0B3D91; padding: 12px 12px; border-bottom: none; }
+          .regras-block { background: #F4F6F8; border: 1px solid #dce1e8; border-radius: 8px; padding: 16px; }
           .regras-block p { font-size: 11px; color: #374151; line-height: 1.6; white-space: pre-wrap; }
-          .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; }
-          .footer p { font-size: 11px; color: #9ca3af; }
-          .no-print { }
-          .print-bar { background: #6c5ce7; color: white; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap-16; position: sticky; top: 0; z-index: 100; }
+          .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #dce1e8; text-align: center; }
+          .footer p { font-size: 11px; color: #8d99a8; }
+          .print-bar { background: #0B3D91; color: white; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
           .print-bar p { font-size: 14px; font-weight: 500; }
           @media print {
             .no-print { display: none !important; }
@@ -119,16 +115,14 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
         `}</style>
       </head>
       <body>
-        {/* Print bar */}
         <div className="print-bar no-print">
           <p>Proposta — {cliente.nome}</p>
           <PrintButton />
         </div>
 
         <div className="page">
-          {/* Header */}
           <div className="header">
-            <div className="brand">
+            <div>
               <div className="brand-name">FULL SALES</div>
               <div className="brand-sub">Locação de Espaço para Eventos</div>
             </div>
@@ -138,7 +132,6 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
             </div>
           </div>
 
-          {/* Dados do evento */}
           <div className="section">
             <div className="section-title">Dados do Evento</div>
             <div className="grid-2">
@@ -153,7 +146,6 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
             </div>
           </div>
 
-          {/* Dados do cliente */}
           <div className="section">
             <div className="section-title">Cliente</div>
             <div className="grid-2">
@@ -182,7 +174,6 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
             </div>
           </div>
 
-          {/* Descritivo */}
           {descritivo.length > 0 && (
             <div className="section">
               <div className="section-title">Escopo do Evento</div>
@@ -194,7 +185,6 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
             </div>
           )}
 
-          {/* Precificação */}
           <div className="section">
             <div className="section-title">Valores</div>
             <table className="pricing-table">
@@ -213,7 +203,7 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
                     </tr>
                     <tr>
                       <td className="label">Desconto ({desconto}%)</td>
-                      <td className="value" style={{ color: '#dc2626' }}>− {formatCurrency(subtotal - valorTotal)}</td>
+                      <td className="value" style={{ color: '#C0392B' }}>− {formatCurrency(subtotal - valorTotal)}</td>
                     </tr>
                   </>
                 )}
@@ -225,7 +215,6 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
             </table>
           </div>
 
-          {/* Regras comerciais */}
           {regrasComerciais?.regras_texto && (
             <div className="section">
               <div className="section-title">Regras Comerciais</div>
@@ -235,7 +224,6 @@ export default async function ImprimirPropostaPage({ params }: { params: Promise
             </div>
           )}
 
-          {/* Footer */}
           <div className="footer">
             <p>Proposta gerada em {format(new Date(proposta.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} · Full Sales © {new Date().getFullYear()}</p>
           </div>

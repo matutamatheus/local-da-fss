@@ -173,6 +173,7 @@ export default async function ReservaDetailPage({ params }: { params: Promise<{ 
             <GerarProposta
               reservaId={id}
               clienteId={reserva.cliente_id}
+              clienteNome={cliente?.nome}
               valorTotal={reserva.valor_total}
               clienteEmail={cliente?.email}
             />
