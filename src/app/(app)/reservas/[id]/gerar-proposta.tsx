@@ -161,11 +161,12 @@ export default function GerarProposta({
   return (
     <div className="bg-white border border-[var(--gray-200)] rounded-xl p-4 space-y-3">
       <p className="text-sm font-semibold text-[var(--gray-900)]">Gerar Proposta PDF</p>
+      <p className="text-xs text-[var(--gray-400)]">Descreva o que está incluso no evento. Cada linha vira um bullet na proposta. Os valores e regras comerciais são adicionados automaticamente.</p>
       <textarea
         value={descritivo}
         onChange={e => setDescritivo(e.target.value)}
         rows={4}
-        placeholder="• Locação do espaço principal&#10;• Infraestrutura básica&#10;• Estacionamento..."
+        placeholder="• Locação do espaço principal&#10;• Infraestrutura básica inclusa&#10;• Estacionamento para 30 veículos&#10;• Coffee break para 50 pessoas"
         className="w-full border border-[var(--gray-200)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none font-mono"
       />
       {error && (

@@ -26,7 +26,17 @@ export default async function RegrasPage() {
     <div className="max-w-3xl mx-auto">
       <div className="mb-6 lg:mb-8">
         <h1 className="text-xl lg:text-2xl font-bold text-[var(--gray-900)]">Regras de Diárias e Preços</h1>
-        <p className="text-[var(--gray-500)] mt-1 text-sm">Configure valores, multiplicadores e regras comerciais</p>
+        <p className="text-[var(--gray-500)] mt-1 text-sm">Configure os valores que serão aplicados automaticamente ao criar reservas.</p>
+      </div>
+
+      {/* Guia rápido */}
+      <div className="bg-[var(--primary-light)] rounded-xl p-4 mb-6 lg:mb-8">
+        <p className="text-sm font-semibold text-[var(--primary)] mb-2">Como funciona o cálculo de preço?</p>
+        <p className="text-xs text-[var(--gray-600)] leading-relaxed">
+          <strong>Diária Final</strong> = Valor base do dia da semana × Multiplicador de ocupação × Multiplicador de proximidade<br/>
+          <strong>Total do Evento</strong> = Soma das diárias finais de cada dia − Desconto aplicado<br/><br/>
+          Os multiplicadores ajustam o preço conforme a demanda: meses mais ocupados ficam mais caros, e reservas de última hora também. Tudo é calculado automaticamente no Bookar Data.
+        </p>
       </div>
 
       <RegrasForm

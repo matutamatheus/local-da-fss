@@ -105,6 +105,7 @@ export default function RegrasForm({
       <Card>
         <CardHeader>
           <h2 className="font-semibold text-[var(--gray-900)]">Valores por Dia da Semana</h2>
+          <p className="text-xs text-[var(--gray-400)] mt-0.5">Defina o valor base da diária e o mínimo de dias exigido para cada dia da semana. Fins de semana geralmente exigem mínimo de 2 diárias.</p>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -146,7 +147,10 @@ export default function RegrasForm({
 
       {/* Desconto máximo */}
       <Card>
-        <CardHeader><h2 className="font-semibold text-[var(--gray-900)]">Desconto Máximo Autorizado</h2></CardHeader>
+        <CardHeader>
+          <h2 className="font-semibold text-[var(--gray-900)]">Desconto Máximo Autorizado</h2>
+          <p className="text-xs text-[var(--gray-400)] mt-0.5">Limite de desconto que a equipe comercial pode aplicar ao criar uma reserva.</p>
+        </CardHeader>
         <CardContent>
           <div className="max-w-xs">
             <Input
@@ -159,9 +163,6 @@ export default function RegrasForm({
               onChange={e => setDescontoMax(e.target.value)}
             />
           </div>
-          <p className="text-xs text-[var(--gray-400)] mt-2">
-            &ldquo;Nunca há desconto agressivo porque o preço base já está corretamente majorado.&rdquo;
-          </p>
         </CardContent>
       </Card>
 
@@ -169,7 +170,7 @@ export default function RegrasForm({
       <Card>
         <CardHeader>
           <h2 className="font-semibold text-[var(--gray-900)]">Multiplicador por Ocupação</h2>
-          <p className="text-xs text-[var(--gray-500)] mt-0.5">Baseado na quantidade de participantes</p>
+          <p className="text-xs text-[var(--gray-400)] mt-0.5">Ajusta o preço conforme o número de participantes do evento. Eventos maiores podem ter preço maior (ex: ×1.20 para +80 pessoas).</p>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -198,7 +199,7 @@ export default function RegrasForm({
       <Card>
         <CardHeader>
           <h2 className="font-semibold text-[var(--gray-900)]">Multiplicador por Proximidade</h2>
-          <p className="text-xs text-[var(--gray-500)] mt-0.5">Baseado em dias de antecedência ao evento</p>
+          <p className="text-xs text-[var(--gray-400)] mt-0.5">Ajusta o preço conforme a antecedência da reserva. Reservas de última hora (menos de 30 dias) ficam mais caras, reservas com +120 dias ganham desconto.</p>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -233,7 +234,8 @@ export default function RegrasForm({
       {/* Regras comerciais */}
       <Card>
         <CardHeader>
-          <h2 className="font-semibold text-[var(--gray-900)]">Regras Comerciais (aparece na proposta PDF)</h2>
+          <h2 className="font-semibold text-[var(--gray-900)]">Regras Comerciais</h2>
+          <p className="text-xs text-[var(--gray-400)] mt-0.5">Este texto aparece automaticamente em todas as propostas PDF geradas. Edite conforme as condições comerciais da Full Sales.</p>
         </CardHeader>
         <CardContent>
           <textarea
@@ -243,6 +245,7 @@ export default function RegrasForm({
             className="w-full border border-[var(--gray-200)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] font-mono resize-y"
             placeholder="Digite as regras comerciais que aparecem em todas as propostas..."
           />
+          <p className="text-xs text-[var(--gray-400)] mt-2">Inclua regras de cancelamento, pagamento, responsabilidades, etc.</p>
         </CardContent>
       </Card>
 

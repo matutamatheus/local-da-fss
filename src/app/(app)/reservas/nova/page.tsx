@@ -243,16 +243,30 @@ function NovaReservaForm() {
           <ArrowLeft size={16} /> Voltar
         </Link>
         <h1 className="text-xl lg:text-2xl font-bold text-[var(--gray-900)]">Bookar Data</h1>
-        <p className="text-[var(--gray-500)] mt-1 text-sm">Criar nova reserva para o espaço</p>
+        <p className="text-[var(--gray-500)] mt-1 text-sm">Preencha os dados abaixo para reservar o espaço. Os campos com * são obrigatórios.</p>
+      </div>
+
+      {/* Guia de passos */}
+      <div className="flex items-center gap-2 text-xs text-[var(--gray-400)] mb-2">
+        <span className={`px-2 py-1 rounded-full font-medium ${form.cliente_id ? 'bg-[var(--success-light)] text-[#1e8449]' : 'bg-[var(--primary-light)] text-[var(--primary)]'}`}>1. Cliente</span>
+        <span className="text-[var(--gray-300)]">→</span>
+        <span className={`px-2 py-1 rounded-full font-medium ${form.data_entrada && form.data_saida ? 'bg-[var(--success-light)] text-[#1e8449]' : 'bg-[var(--gray-100)] text-[var(--gray-500)]'}`}>2. Datas</span>
+        <span className="text-[var(--gray-300)]">→</span>
+        <span className={`px-2 py-1 rounded-full font-medium ${form.num_participantes !== '1' || form.audiovisual ? 'bg-[var(--success-light)] text-[#1e8449]' : 'bg-[var(--gray-100)] text-[var(--gray-500)]'}`}>3. Detalhes</span>
+        <span className="text-[var(--gray-300)]">→</span>
+        <span className="px-2 py-1 rounded-full font-medium bg-[var(--gray-100)] text-[var(--gray-500)]">4. Confirmar</span>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Cliente */}
+        {/* Passo 1: Cliente */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-[var(--gray-900)]">Cliente</h2>
-              <Link href="/clientes/novo" className="text-xs text-[var(--primary)] hover:underline">+ Novo cliente</Link>
+              <div>
+                <h2 className="font-semibold text-[var(--gray-900)]">1. Selecione o cliente *</h2>
+                <p className="text-xs text-[var(--gray-400)] mt-0.5">Busque pelo nome ou empresa. Caso não encontre, cadastre um novo.</p>
+              </div>
+              <Link href="/clientes/novo" className="text-xs text-[var(--primary)] hover:underline flex items-center gap-1">+ Novo cliente</Link>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -286,9 +300,12 @@ function NovaReservaForm() {
           </CardContent>
         </Card>
 
-        {/* Datas e espaço */}
+        {/* Passo 2: Datas */}
         <Card>
-          <CardHeader><h2 className="font-semibold text-[var(--gray-900)]">Período</h2></CardHeader>
+          <CardHeader>
+            <h2 className="font-semibold text-[var(--gray-900)]">2. Período da reserva *</h2>
+            <p className="text-xs text-[var(--gray-400)] mt-0.5">Selecione a data de entrada e saída. O sistema verifica conflitos automaticamente.</p>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <Input label="Data de entrada *" type="date" value={form.data_entrada}
@@ -345,9 +362,12 @@ function NovaReservaForm() {
           </CardContent>
         </Card>
 
-        {/* Detalhes */}
+        {/* Passo 3: Detalhes */}
         <Card>
-          <CardHeader><h2 className="font-semibold text-[var(--gray-900)]">Detalhes do Evento</h2></CardHeader>
+          <CardHeader>
+            <h2 className="font-semibold text-[var(--gray-900)]">3. Detalhes do evento</h2>
+            <p className="text-xs text-[var(--gray-400)] mt-0.5">Informe o número de participantes e selecione o status inicial da reserva.</p>
+          </CardHeader>
           <CardContent className="space-y-4">
             <Input label="Número de participantes" type="number" min="1"
               value={form.num_participantes} onChange={e => set('num_participantes', e.target.value)} />
@@ -440,18 +460,21 @@ function NovaReservaForm() {
           </Card>
         )}
 
-        {/* Proposta */}
+        {/* Passo 4: Proposta */}
         <Card>
-          <CardHeader><h2 className="font-semibold text-[var(--gray-900)]">Proposta (opcional)</h2></CardHeader>
+          <CardHeader>
+            <h2 className="font-semibold text-[var(--gray-900)]">4. Proposta (opcional)</h2>
+            <p className="text-xs text-[var(--gray-400)] mt-0.5">Preencha para gerar um PDF de proposta junto com a reserva. Você também pode gerar depois.</p>
+          </CardHeader>
           <CardContent>
             <div>
               <label className="block text-sm font-medium text-[var(--gray-700)] mb-1">
-                Descritivo da proposta (bullets separados por linha)
+                Escopo do evento — um item por linha
               </label>
               <textarea value={form.descritivo} onChange={e => set('descritivo', e.target.value)}
-                rows={4} placeholder="• Locação do espaço principal&#10;• Infraestrutura básica inclusa&#10;• Estacionamento..."
+                rows={4} placeholder="• Locação do espaço principal&#10;• Infraestrutura básica inclusa&#10;• Estacionamento&#10;• Coffee break para 50 pessoas"
                 className="w-full border border-[var(--gray-200)] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none font-mono" />
-              <p className="text-xs text-[var(--gray-400)] mt-1">Deixar em branco para não gerar proposta agora.</p>
+              <p className="text-xs text-[var(--gray-400)] mt-1">Cada linha vira um bullet na proposta PDF. Deixe em branco para não gerar agora.</p>
             </div>
           </CardContent>
         </Card>
@@ -461,9 +484,15 @@ function NovaReservaForm() {
         )}
 
         <div className="flex gap-3">
-          <Button type="submit" loading={loading} disabled={conflito || !!minimoError}>Criar Reserva</Button>
+          <Button type="submit" loading={loading} disabled={conflito || !!minimoError}>
+            {form.descritivo.trim() ? 'Criar Reserva + Proposta' : 'Criar Reserva'}
+          </Button>
           <Link href="/clientes"><Button type="button" variant="secondary">Cancelar</Button></Link>
         </div>
+        <p className="text-xs text-[var(--gray-400)] text-center">
+          Ao criar, a reserva aparecerá no calendário e no histórico do cliente.
+          {form.descritivo.trim() ? ' Uma proposta PDF será gerada automaticamente.' : ''}
+        </p>
       </form>
     </div>
   )

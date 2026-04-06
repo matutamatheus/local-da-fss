@@ -89,12 +89,13 @@ export default function BloqueiosPage() {
         <h1 className="text-xl lg:text-2xl font-bold text-[var(--gray-900)] flex items-center gap-2">
           <ShieldBan size={24} /> Bloqueios de Calendário
         </h1>
-        <p className="text-[var(--gray-500)] mt-1 text-sm">Bloqueie datas para manutenção ou indisponibilidade</p>
+        <p className="text-[var(--gray-500)] mt-1 text-sm">Bloqueie períodos para manutenção, feriados ou indisponibilidade. Datas bloqueadas aparecem em cinza no calendário e impedem novas reservas.</p>
       </div>
 
       {/* Formulário */}
       <Card className="mb-6">
         <CardContent>
+          <p className="text-xs text-[var(--gray-500)] mb-3 font-medium">Novo bloqueio</p>
           <form onSubmit={handleCreate} className="flex flex-col sm:flex-row gap-3 items-end">
             <div className="flex-1">
               <Input

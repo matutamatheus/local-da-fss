@@ -92,26 +92,33 @@ export default function NovoClientePage() {
           <ArrowLeft size={16} /> Voltar para Clientes
         </Link>
         <h1 className="text-xl lg:text-2xl font-bold text-[var(--gray-900)]">Novo Cliente</h1>
+        <p className="text-[var(--gray-500)] mt-1 text-sm">Cadastre um novo cliente para criar reservas e acompanhar no CRM.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Dados principais */}
         <Card>
-          <CardHeader><h2 className="font-semibold text-[var(--gray-900)]">Dados do Cliente</h2></CardHeader>
+          <CardHeader>
+            <h2 className="font-semibold text-[var(--gray-900)]">Informações de contato</h2>
+            <p className="text-xs text-[var(--gray-400)] mt-0.5">Apenas o nome é obrigatório. Os demais campos ajudam no envio de propostas e comunicação.</p>
+          </CardHeader>
           <CardContent className="space-y-4">
-            <Input label="Nome completo *" value={form.nome} onChange={e => set('nome', e.target.value)} required />
-            <Input label="Empresa" value={form.empresa} onChange={e => set('empresa', e.target.value)} />
+            <Input label="Nome completo *" value={form.nome} onChange={e => set('nome', e.target.value)} required placeholder="Nome do responsável ou empresa" />
+            <Input label="Empresa" value={form.empresa} onChange={e => set('empresa', e.target.value)} placeholder="Nome da empresa (se aplicável)" />
             <div className="grid sm:grid-cols-2 gap-4">
-              <Input label="E-mail" type="email" value={form.email} onChange={e => set('email', e.target.value)} />
-              <Input label="Telefone / WhatsApp" value={form.telefone} onChange={e => set('telefone', e.target.value)} />
+              <Input label="E-mail" type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="email@empresa.com" />
+              <Input label="Telefone / WhatsApp" value={form.telefone} onChange={e => set('telefone', e.target.value)} placeholder="(00) 00000-0000" />
             </div>
-            <Input label="Site" type="url" value={form.site} onChange={e => set('site', e.target.value)} placeholder="https://..." />
+            <Input label="Site" type="url" value={form.site} onChange={e => set('site', e.target.value)} placeholder="https://www.empresa.com.br" />
           </CardContent>
         </Card>
 
         {/* Full Sales */}
         <Card>
-          <CardHeader><h2 className="font-semibold text-[var(--gray-900)]">Relacionamento Full Sales</h2></CardHeader>
+          <CardHeader>
+            <h2 className="font-semibold text-[var(--gray-900)]">Relacionamento Full Sales</h2>
+            <p className="text-xs text-[var(--gray-400)] mt-0.5">Marque se o cliente já é cliente de algum produto Full Sales.</p>
+          </CardHeader>
           <CardContent className="space-y-4">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -143,22 +150,30 @@ export default function NovoClientePage() {
 
         {/* Próximos eventos */}
         <Card>
-          <CardHeader><h2 className="font-semibold text-[var(--gray-900)]">Próximos Eventos</h2></CardHeader>
+          <CardHeader>
+            <h2 className="font-semibold text-[var(--gray-900)]">Próximos eventos previstos</h2>
+            <p className="text-xs text-[var(--gray-400)] mt-0.5">Registre até 2 eventos futuros deste cliente para acompanhamento.</p>
+          </CardHeader>
           <CardContent className="space-y-4">
+            <p className="text-xs font-medium text-[var(--gray-500)] uppercase tracking-wide">Evento 1</p>
             <div className="grid sm:grid-cols-2 gap-4">
-              <Input label="Data do Evento 1" type="date" value={form.proximo_evento_1} onChange={e => set('proximo_evento_1', e.target.value)} />
-              <Input label="Pessoas estimadas" type="number" min="1" value={form.proximo_evento_1_pessoas} onChange={e => set('proximo_evento_1_pessoas', e.target.value)} />
+              <Input label="Data prevista" type="date" value={form.proximo_evento_1} onChange={e => set('proximo_evento_1', e.target.value)} />
+              <Input label="Pessoas estimadas" type="number" min="1" value={form.proximo_evento_1_pessoas} onChange={e => set('proximo_evento_1_pessoas', e.target.value)} placeholder="Ex: 50" />
             </div>
+            <p className="text-xs font-medium text-[var(--gray-500)] uppercase tracking-wide">Evento 2</p>
             <div className="grid sm:grid-cols-2 gap-4">
-              <Input label="Data do Evento 2" type="date" value={form.proximo_evento_2} onChange={e => set('proximo_evento_2', e.target.value)} />
-              <Input label="Pessoas estimadas" type="number" min="1" value={form.proximo_evento_2_pessoas} onChange={e => set('proximo_evento_2_pessoas', e.target.value)} />
+              <Input label="Data prevista" type="date" value={form.proximo_evento_2} onChange={e => set('proximo_evento_2', e.target.value)} />
+              <Input label="Pessoas estimadas" type="number" min="1" value={form.proximo_evento_2_pessoas} onChange={e => set('proximo_evento_2_pessoas', e.target.value)} placeholder="Ex: 100" />
             </div>
           </CardContent>
         </Card>
 
         {/* CRM & Observações */}
         <Card>
-          <CardHeader><h2 className="font-semibold text-[var(--gray-900)]">CRM & Observações</h2></CardHeader>
+          <CardHeader>
+            <h2 className="font-semibold text-[var(--gray-900)]">CRM e observações</h2>
+            <p className="text-xs text-[var(--gray-400)] mt-0.5">Defina a etapa inicial do funil comercial e adicione notas relevantes.</p>
+          </CardHeader>
           <CardContent className="space-y-4">
             {etapas.length > 0 && (
               <div>
@@ -198,6 +213,9 @@ export default function NovoClientePage() {
             <Button type="button" variant="secondary">Cancelar</Button>
           </Link>
         </div>
+        <p className="text-xs text-[var(--gray-400)] text-center">
+          Após o cadastro, o cliente ficará disponível para reservas, propostas e no CRM.
+        </p>
       </form>
     </div>
   )
