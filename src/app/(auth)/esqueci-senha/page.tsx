@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { CheckCircle, MessageCircle } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
 
 type Step = 'email' | 'code' | 'password' | 'done'
 
@@ -115,7 +115,7 @@ export default function EsqueciSenhaPage() {
             <>
               <h2 className="text-xl font-semibold text-[var(--gray-900)] mb-2">Esqueci minha senha</h2>
               <p className="text-sm text-[var(--gray-500)] mb-6">
-                Informe seu e-mail cadastrado. Enviaremos um código de verificação para o WhatsApp vinculado à sua conta.
+                Informe seu e-mail cadastrado para receber um código de verificação.
               </p>
 
               <form onSubmit={handleEmailSubmit} className="space-y-4">
@@ -135,7 +135,7 @@ export default function EsqueciSenhaPage() {
                 )}
 
                 <Button type="submit" loading={loading} className="w-full">
-                  <MessageCircle size={16} /> Enviar código por WhatsApp
+                  Enviar código de verificação
                 </Button>
               </form>
             </>
@@ -145,16 +145,17 @@ export default function EsqueciSenhaPage() {
           {step === 'code' && (
             <>
               <h2 className="text-xl font-semibold text-[var(--gray-900)] mb-2">Confirmar código</h2>
-              <p className="text-sm text-[var(--gray-500)] mb-6">
-                Um código de 6 dígitos foi enviado para o WhatsApp com final <strong>{maskedPhone}</strong>. Insira o código abaixo.
-              </p>
 
               {devCode && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-4">
-                  <p className="text-xs text-yellow-700 font-medium">Modo desenvolvimento (sem API WhatsApp)</p>
-                  <p className="text-sm text-yellow-900 font-mono mt-1">Código: <strong>{devCode}</strong></p>
+                <div className="bg-[var(--primary-light)] border border-[var(--primary)] rounded-lg px-4 py-3 mb-4">
+                  <p className="text-xs text-[var(--primary)] font-semibold mb-1">Seu código de verificação</p>
+                  <p className="text-2xl font-bold text-[var(--primary)] font-mono tracking-widest">{devCode}</p>
                 </div>
               )}
+
+              <p className="text-sm text-[var(--gray-500)] mb-6">
+                Digite o código de 6 dígitos abaixo para continuar.
+              </p>
 
               <form onSubmit={handleCodeSubmit} className="space-y-4">
                 <Input
