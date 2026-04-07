@@ -89,27 +89,32 @@ const STEPS: Record<UserRole, Step[]> = {
     {
       icon: '👋',
       title: 'Bem-vindo ao Local da FSS!',
-      description: 'Como Parceiro, você pode consultar disponibilidade e criar pré-reservas para seus clientes.',
+      description: 'Como Parceiro, você pode consultar disponibilidade, simular preços, criar pré-reservas e gerar propostas para seus clientes.',
     },
     {
       icon: '📅',
       title: 'Calendário — veja disponibilidade',
-      description: 'Confira as datas disponíveis antes de fazer uma pré-reserva. Verde = disponível, amarelo = pré-reservado, vermelho = agendado (confirmado).',
+      description: 'Confira as datas disponíveis. Verde = aberta, amarelo = pré-reservada, vermelho = agendada (confirmada), cinza = bloqueada.',
+    },
+    {
+      icon: '🧮',
+      title: 'Simulador de Preço — saiba o valor',
+      description: 'Use o Simulador para calcular o valor de uma reserva antes de criar. Basta informar datas e participantes — o preço é calculado automaticamente.',
     },
     {
       icon: '🔒',
-      title: 'Nova Pré-reserva — segure uma data',
-      description: 'Crie uma pré-reserva para seu cliente. Ela fica com status amarelo no calendário até ser confirmada pela equipe comercial.',
+      title: 'Nova Pré-reserva + Proposta',
+      description: 'Crie uma pré-reserva e gere uma proposta em PDF com valores e regras comerciais. Você pode enviar a proposta por email diretamente ao cliente.',
     },
     {
       icon: '👥',
       title: 'Clientes — cadastre e acompanhe',
-      description: 'Cadastre seus clientes com dados de contato e próximos eventos. O histórico de reservas fica vinculado ao perfil.',
+      description: 'Cadastre clientes, veja histórico de reservas e propostas, e acompanhe próximos eventos.',
     },
     {
       icon: '✅',
       title: 'Pronto para começar!',
-      description: 'Use o menu lateral para navegar. Para confirmar uma pré-reserva ou tirar dúvidas, entre em contato com a equipe comercial.',
+      description: 'Use o menu lateral para navegar. O botão "?" reabre este guia. Para confirmar uma pré-reserva, entre em contato com a equipe comercial.',
     },
   ],
   solicitante: [

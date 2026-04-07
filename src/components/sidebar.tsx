@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   Calendar,
   CalendarPlus,
+  Calculator,
   ClipboardList,
   FilePlus,
   Home,
@@ -44,6 +45,7 @@ const solicitanteLinks = [
 const comercialLinks = [
   { href: '/clientes', label: 'Clientes', icon: Users },
   { href: '/reservas/nova', label: 'Bookar Data', icon: CalendarPlus },
+  { href: '/simulador', label: 'Simulador de Preço', icon: Calculator },
   { href: '/crm', label: 'CRM', icon: KanbanSquare },
   { href: '/calendario', label: 'Calendário', icon: Calendar },
   { href: '/especificacoes', label: 'Especificações', icon: Image },
@@ -53,7 +55,9 @@ const comercialLinks = [
 const parceiroLinks = [
   { href: '/clientes', label: 'Clientes', icon: Users },
   { href: '/reservas/nova', label: 'Nova Pré-reserva', icon: CalendarPlus },
+  { href: '/simulador', label: 'Simulador de Preço', icon: Calculator },
   { href: '/calendario', label: 'Calendário', icon: Calendar },
+  { href: '/especificacoes', label: 'Especificações', icon: Image },
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
