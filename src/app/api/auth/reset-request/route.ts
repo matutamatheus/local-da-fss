@@ -82,12 +82,10 @@ export async function POST(request: NextRequest) {
 
     const sent = await sendWhatsApp(profile.telefone, code)
 
-    const isDev = process.env.NODE_ENV === 'development'
-
     return NextResponse.json({
       success: true,
       masked: maskPhone(profile.telefone),
-      ...(isDev && !sent ? { devCode: code } : {}),
+      ...(!sent ? { devCode: code } : {}),
     })
   } catch (err) {
     console.error('reset-request error:', err)
