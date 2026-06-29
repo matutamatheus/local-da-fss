@@ -1,0 +1,9 @@
+# Dependências para o modo OFFLINE (sem API key).
+# Inclui as básicas + Whisper local + tradução offline.
+yt-dlp>=2024.1.0
+
+# Whisper da OpenAI rodando localmente (puxa o torch automaticamente).
+openai-whisper>=20231117
+
+# Tradução offline (opcional, mas necessária para traduzir sem API key).
+argostranslate>=1.9.0
